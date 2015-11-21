@@ -2,7 +2,18 @@
 # vi: set ft=ruby :
 
 MESSAGE = <<-MESSAGE
-WELCOME to Beavy Development.
+
+Welcome to
+
+    .o8
+   "888
+    888oooo.   .ooooo.   .oooo.   oooo    ooo oooo    ooo
+    d88' `88b d88' `88b `P  )88b   `88.  .8'   `88.  .8'
+    888   888 888ooo888  .oP"888    `88..8'     `88..8'
+    888   888 888    .o d8(  888     `888'       `888'
+    `Y8bod8P' `Y8bod8P' `Y888""8o     `8'         .8'
+                                            .o..P'
+                                            `Y8P'
 
 Please log in into the develop system with
 
