@@ -43,9 +43,16 @@ Vagrant.configure(2) do |config|
   config.vm.box = "debian/jessie64"
   config.vm.post_up_message = MESSAGE
 
-  config.vm.network "forwarded_port", guest: 2992, host: 2992
+  config.vm.provider :virtualbox do |v|
+    v.customize ["modifyvm", :id, "--memory", 2048]
+  end
 
-  config.vm.synced_folder ".infrastructure/vagrant", "/root/", create: true, group: "www-data", owner: "www-data"
+  config.vm.network "forwarded_port", guest: 2992, host: 2992
+  config.vm.network "private_network", type: "dhcp"
+
+  config.vm.synced_folder ".infrastructure/vagrant", "/root/", create: true
+
+  config.vm.synced_folder ".", "/vagrant", type: "nfs"
 
   config.vm.provision "shell", inline: INSTALL
   config.vm.provision "shell", inline: SETUP
