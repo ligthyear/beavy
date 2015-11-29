@@ -1,0 +1,9 @@
+NAME: Beavy Hive
+
+MODULES:
+ - comments
+ - likes
+
+APP: hive
+
+HOME_URL: /hello

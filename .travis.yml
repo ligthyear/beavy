@@ -22,6 +22,7 @@ env:
     # RECOMMENDED WAY: comment these and add your own after
     - APP=minima
     - APP=hacker_news
+    - APP=hive
     # - APP=myAwesomeApp
 
 before_install:
