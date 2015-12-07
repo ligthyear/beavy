@@ -51,7 +51,7 @@ def after_scenario(context, scenario):
         has_warnings = False
         for entry in context.browser.driver.get_log('browser'):
 
-            if entry["level"] not in ["WARNING", "ERROR"]:
+            if entry["level"] not in ["WARNING", "ERROR", "SEVERE"]:
                 continue
 
             try:
