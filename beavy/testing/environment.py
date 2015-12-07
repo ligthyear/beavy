@@ -81,16 +81,17 @@ def after_scenario(context, scenario):
 
 
 def after_step(context, step):
-    if BEHAVE_DEBUG_ON_ERROR and step.status == "failed":
-        # -- ENTER DEBUGGER: Zoom in on failure location.
-        # NOTE: Use IPython debugger, same for pdb (basic python debugger).
-        try:
-            import ipdb as pdb
-        except ImportError:
-            import pdb
-
+    if step.status == "failed":
         if getattr(context, "browser", None):
             pprint(context.browser.driver.get_log('browser')[-10:])
             print("Current Screen: {}".format(context.browser.screenshot()))
 
-        pdb.post_mortem(step.exc_traceback)
+        if BEHAVE_DEBUG_ON_ERROR:
+            # -- ENTER DEBUGGER: Zoom in on failure location.
+            # NOTE: Use IPython debugger, same for pdb (basic python debugger).
+            try:
+                import ipdb as pdb
+            except ImportError:
+                import pdb
+
+            pdb.post_mortem(step.exc_traceback)
