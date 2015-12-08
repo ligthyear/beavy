@@ -4,6 +4,7 @@ import { Route } from 'react-router'
 import { make_url } from 'utils'
 
 import UserView from 'views/UserView'
+import ListView from 'views/ListView'
 import HomeView from 'views/HomeView'
 
 export default function setupViews (Application) {
@@ -19,4 +20,8 @@ export default function setupViews (Application) {
       <Route key='account' name='account' path={make_url.account('')}>
         {getExtensions('accountRoutes')}
       </Route>)
+
+  addExtension('routes',
+      <Route key='list' name='list' path={make_url.list('/:listName/')} component={ListView} />)
+
 }
