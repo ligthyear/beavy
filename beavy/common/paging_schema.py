@@ -15,11 +15,20 @@ class BasePaging(Schema):
     def move_to_meta(self, data):
         items = data.pop("items")
         # FIXME: add support for paging links
-        return {
-            "meta": data,
-            "data": items.get("data", []),
-            "links": items.get("links", [])
-            }
+        if isinstance(items, dict):
+            return {
+                "meta": data,
+                "data": items.get("data", []),
+                "links": items.get("links", [])
+                }
+        elif isinstance(items, list):
+            return {
+                "meta": data,
+                "data": [x.get("data") for x in items],
+                "links": []
+                }
+
+        raise ValueError("Usage of wrong listing type")
 
 
 def makePaginationSchema(itemsCls, field_cls=fields.Nested):

@@ -2,6 +2,10 @@ from beavy.common.paging_schema import makePaginationSchema
 from beavy.common.morphing_schema import MorphingSchema
 from marshmallow_jsonapi import Schema, fields
 
+from collections import namedtuple
+
+dumpObj = namedtuple('MarshmallowDump', 'data error')
+
 from .user import BaseUser
 
 
@@ -21,8 +25,12 @@ class ObjectField(MorphingSchema):
     registry = {}
 
 
-class ObjectSchema(ObjectField, Schema):
-    pass
+class ObjectSchema(ObjectField, BaseObject):
 
+    def dump(self, value, many=False, **kwargs):
+        if many:
+            return dumpObj([self._get_serializer(x).dump(x).data
+                            for x in value], {})
+        return dumpObj(self._get_serializer(value).dump(value), {})
 
 objects_paged = makePaginationSchema(ObjectSchema)()
