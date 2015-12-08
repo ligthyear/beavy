@@ -7,6 +7,7 @@ import simpleSubmit from 'reducers/simple_submit'
 
 import SubmitView from './views/SubmitView'
 import LinkView from './views/LinkView'
+import LinkListItem from './views/LinkListItem'
 // import TopicView from './views/LinkView';
 
 addNamedExtension('reducers', STORY_SUBMIT, simpleSubmit({
@@ -14,6 +15,8 @@ addNamedExtension('reducers', STORY_SUBMIT, simpleSubmit({
 }))
 
 export function setupViews (Application) {
+  addNamedExtension('listItemRenderer', 'link', LinkListItem)
+
   addExtension('routes',
       <Route key='submit' name='submit' path='/submit/' component={SubmitView} />)
 
