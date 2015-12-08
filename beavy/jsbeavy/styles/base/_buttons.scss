@@ -1,16 +1,21 @@
+$base-button-weight: 600 !default;
+$base-button-line-height: 1 !default;
+$base-button-color: $action-color !default;
+$base-button-border-radius: $base-border-radius !default;
+
 #{$all-buttons} {
   appearance: none;
-  background-color: $action-color;
+  background-color: $base-button-color;
   border: 0;
-  border-radius: $base-border-radius;
+  border-radius: $base-button-border-radius;
   color: #fff;
   cursor: pointer;
   display: inline-block;
   font-family: $base-font-family;
   font-size: $base-font-size;
   -webkit-font-smoothing: antialiased;
-  font-weight: 600;
-  line-height: 1;
+  font-weight: $base-button-weight;
+  line-height: $base-button-line-height;
   padding: $small-spacing $base-spacing;
   text-decoration: none;
   transition: background-color $base-duration $base-timing;
@@ -20,7 +25,7 @@
 
   &:hover,
   &:focus {
-    background-color: shade($action-color, 20%);
+    background-color: shade($base-button-color, 20%);
     color: #fff;
   }
 
@@ -29,7 +34,7 @@
     opacity: 0.5;
 
     &:hover {
-      background-color: $action-color;
+      background-color: $base-button-color;
     }
   }
 }
