@@ -26,7 +26,7 @@ Flask-DebugToolbar==0.10.0
 Flask-Limiter==0.8.2
 Flask-Login==0.3.2
 Flask-Mail==0.9.1
-flask-marshmallow==0.6.1
+flask-marshmallow==0.6.2
 Flask-Migrate==1.5.1
 -e git+https://github.com/ligthyear/flask-oauth.git@9fb5aa6a141e03bf8a7b0741a51e3e663aaab377#egg=Flask_OAuth-master
 Flask-Principal==0.4.0
@@ -46,9 +46,9 @@ kombu==3.0.26
 limits==1.0.8
 Mako==1.0.2
 MarkupSafe==0.23
-marshmallow==2.0.0rc2
-marshmallow-jsonapi==0.2.1
-marshmallow-sqlalchemy==0.4.0
+marshmallow==2.4.1
+marshmallow-jsonapi==0.3.0
+marshmallow-sqlalchemy==0.7.0
 mimerender==0.5.5
 mixer==5.2.2
 oauth2==1.9.0.post1
