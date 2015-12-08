@@ -20,6 +20,10 @@ export default class Root extends React.Component {
     application: React.PropTypes.func.isRequired
   }
 
+  componentWillMount () {
+    setupViews(this.props.application)
+  }
+
   getRoutes () {
     const routes_by_path = {}
     const remapRoutes = (routes, path = '') => {
@@ -92,8 +96,6 @@ export default class Root extends React.Component {
           )
       }
     }
-
-    setupViews(this.props.application)
 
     return (
       <div>
