@@ -14,14 +14,14 @@ activity = activity_bp
 
 
 def setup(app):
+    URLS = app.config["URLS"]
     app.register_blueprint(user_bp,
-                           url_prefix=app.config.get('USERS_URL', '/u'))
+                           url_prefix=URLS["USERS"])
     app.register_blueprint(account_bp,
-                           url_prefix=app.config.get('ACCOUNT_URL',
-                                                     '/account'))
+                           url_prefix=URLS['ACCOUNT'])
     app.register_blueprint(object_bp,
-                           url_prefix=app.config.get('OBJECT_URL', '/o'))
+                           url_prefix=URLS['OBJECT'])
     app.register_blueprint(activity_bp,
-                           url_prefix=app.config.get('ACTIVITY_URL', '/a'))
+                           url_prefix=URLS['ACTIVITY'])
     app.register_blueprint(lists_bp,
-                           url_prefix='/')
+                           url_prefix=URLS['LIST'])

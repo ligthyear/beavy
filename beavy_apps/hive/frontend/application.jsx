@@ -31,7 +31,7 @@ export default class HiveApplication extends React.Component {
               >
 
                 <li>
-                  <Link to='/latest/'>threads</Link>
+                  <Link to={make_url.list('latest/')}>latest</Link>
                 </li>
                 <li>
                   <Link to='/submit/'>submit</Link>

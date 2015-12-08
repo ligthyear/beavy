@@ -28,7 +28,7 @@ export default class HackerNewsApplication extends React.Component {
                 logo='http://svgporn.com/logos/ycombinator.svg'
                 navigationTools={<UserMenuWidget />}
               >
-                <Link to={make_url.account('comments/')}>threads</Link>
+                <Link to=to={make_url.list('latest/')}>threads</Link>
                | <Link to='/submit/'>submit</Link>
 
               </MainMenu>

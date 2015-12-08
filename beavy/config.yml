@@ -12,6 +12,9 @@ COMMON: &common
     HOME: /hello
     USERS: /u
     ACCOUNT: /account
+    OBJECT: /o
+    ACTIVITY: /a
+    LIST: '/'
 
   # CACHE STUFF
   CACHE_TYPE: "null"
