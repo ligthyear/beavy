@@ -1,0 +1,11 @@
+@import "main";
+
+.hive {
+    @include outer-container;
+    background: #f6f6ef;
+    margin-top: 10px;
+}
+
+.contentMain {
+  padding: 1em;
+}

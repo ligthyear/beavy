@@ -1,0 +1,20 @@
+= Hive Social Platform
+
+**THIS IS STILL INCOMPLETE**
+
+Home of the beavy community, the app running link:http://hive.beavy.xyz[hive.beavy.xyz].
+
+== Configuration
+
+In order to have this work in a feature complete manner, please put the following into your `config.yaml` (in the root):
+
+```
+NAME: "Hive"
+
+FRONTEND: 'hive'
+
+MODULES:
+ - comments
+ - voting
+ - user_points
+ ```

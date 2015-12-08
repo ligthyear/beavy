@@ -1,0 +1,25 @@
+@import "bourbon/_bourbon.scss";
+@import "base/_base.scss";
+@import "neat/_neat.scss";
+
+
+$main-navigation-background: transparent;
+$main-navigation-padding: 0;
+$base-border-color: white;
+$main-navigation-border-color: $yellow;
+$main-navigation-color: $blue;
+$main-navigation-height: 2em;
+$main-navigation-line-height: 2em;
+$main-navigation-color-hover: #2C8ECF !default;
+
+body {
+  font-weight: 300;
+}
+
+h1, h2, h3 {
+  font-weight: 500;
+}
+
+h4, h5 {
+  font-weight: 400;
+}
