@@ -8,6 +8,7 @@
   $main-navigation-color: transparentize(white, 0.3) !default;
   $main-navigation-color-hover: white !default;
   $main-navigation-height: 60px !default;
+  $main-navigation-line-height: $main-navigation-height !default;
   $main-navigation-nav-button-background: $action-color !default;
   $main-navigation-nav-button-background-hover: lighten($main-navigation-background, 10%) !default;
   $main-navigation-nav-button-border: 1px solid lighten($main-navigation-nav-button-background, 20%) !default;
@@ -21,6 +22,7 @@
   background-color: $main-navigation-background;
   border-bottom: 1px solid $main-navigation-border-color;
   min-height: $main-navigation-height;
+  line-height: $main-navigation-line-height;
   width: 100%;
   z-index: 999;
 
@@ -77,7 +79,7 @@
     }
   }
 
-  ul.navigationMenu {
+  .navigationMenu {
     -webkit-transform-style: preserve-3d; // stop webkit flicker
     clear: both;
     display: none;
@@ -163,7 +165,7 @@
 
   // Sub menus
 
-  li.more {
+  .more {
     overflow: visible;
     padding-right: 0;
 
@@ -198,7 +200,7 @@
     }
   }
 
-  ul.submenu {
+  .submenu {
     display: none;
     padding-left: 0;
 

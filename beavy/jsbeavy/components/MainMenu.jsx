@@ -23,9 +23,9 @@ export class MainMenu extends React.Component {
             {this.props.children}
           </ul>
         </nav>
-        <div className={styles.navigationTools}>
+        <ul className={styles.navigationTools}>
           {this.props.navigationTools}
-        </div>
+        </ul>
       </div>
     </div>
   }
