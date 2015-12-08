@@ -5,5 +5,3 @@ MODULES:
  - likes
 
 APP: hive
-
-HOME_URL: /hello
