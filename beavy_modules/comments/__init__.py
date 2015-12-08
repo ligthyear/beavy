@@ -2,6 +2,7 @@ from beavy.app import admin, db
 from beavy.common.admin_model_view import AdminPolyModelView
 from .models import CommentObject
 from .views import *   # noqa
+from .setup import setup
 
 
 def init_app(app):
@@ -9,3 +10,5 @@ def init_app(app):
                                       name="Comments",
                                       menu_icon_type='glyph',
                                       menu_icon_value='glyphicon-comment'))
+
+    setup()
