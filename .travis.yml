@@ -68,9 +68,14 @@ script:
   - |
     #!/bin/bash
     set -e
-    # -a means we are appending the coverage
+    # starting the server
     coverage run -a manager.py runserver -R &
+    # and the mail mocker
+    mailmock -p 8025 -o ./var/test/mail -n &
+
+    # run the tets
     python manager.py behave
+
     # shutting down gracefully so coverage is written
     curl http://localhost:5000/__TESTS__/shutdown
     # give it a few seconds to stop the process
