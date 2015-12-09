@@ -34,6 +34,7 @@ def after_all(context):
 
 def before_feature(context, feature):
     benv.before_feature(context, feature)
+    context.personas = {}
 
 
 def after_feature(context, feature):
@@ -42,7 +43,7 @@ def after_feature(context, feature):
 
 def before_scenario(context, scenario):
     benv.before_scenario(context, scenario)
-    context.personas = ensure_personas()
+    context.personas.update(ensure_personas())
 
 
 def after_scenario(context, scenario):
