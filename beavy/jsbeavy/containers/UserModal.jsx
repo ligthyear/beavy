@@ -26,7 +26,7 @@ export class UserModal extends React.Component {
     }
 
     return <Modal onRequestClose={(e) => this.props.dispatch(closeModal())}>
-            <iframe src={url}></iframe>
+            <iframe name="usermodal" src={url}></iframe>
           </Modal>
   }
 }

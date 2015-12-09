@@ -16,7 +16,7 @@ export class Modal extends React.Component {
     // closeTimeoutMS: 0
   }
   render () {
-    return <div className={classnames(styles.modal, styles.open)}>
+    return <div name="modalFrame" className={classnames(styles.modal, styles.open)}>
             <div className={styles.modalFadeScreen}>
               <div className={styles.modalInner}>
                 <div onClick={this.props.onRequestClose} className={styles.modalClose}></div>

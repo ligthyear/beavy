@@ -23,16 +23,16 @@ export class UserMenuWidget extends React.Component {
   renderLoggedOut () {
     if (__CONFIG__SECURITY_REGISTERABLE) {
       return <li className={mmStyles.navLink}>
-                <button onClick={(e) => this.props.dispatch(openLogin())}>
+                <button name="login_btn" onClick={(e) => this.props.dispatch(openLogin())}>
                   Login
                 </button>
-                <button onClick={(e) => this.props.dispatch(openRegister())}>
+                <button name="signup_btn" onClick={(e) => this.props.dispatch(openRegister())}>
                   Sign up
                 </button>
              </li>
     } else {
       return <li className={mmStyles.navLink}>
-                <button onClick={(e) => this.props.dispatch(openLogin())}>
+                <button name="login_btn" onClick={(e) => this.props.dispatch(openLogin())}>
                   Login
                 </button>
               </li>
@@ -42,11 +42,11 @@ export class UserMenuWidget extends React.Component {
   render () {
     if (!this.props.is_authenticated) { return this.renderLoggedOut() }
 
-    return <li className={classnames(mmStyles.navLink, mmStyles.more)}>
+    return <li name="usermenu" className={classnames(mmStyles.navLink, mmStyles.more)}>
               <Link to={make_url.users(this.props.user.id)}>Me</Link>
               <ul className={mmStyles.submenu}>
                 {getExtensions('userNavigationItems').map(x => x.call(this))}
-                <li><a href='/logout'>Logout</a></li>
+                <li><a name="logout" href='/logout'>Logout</a></li>
               </ul>
             </li>
   }
