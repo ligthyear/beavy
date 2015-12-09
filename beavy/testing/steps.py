@@ -34,9 +34,11 @@ def click_the_submit_button(context, name):
     assert el.is_enabled(), "Submit button is disabled"
     el.click()
 
+
 @step('I click the submit button of form "{name}"')
 def click_the_submit_button(context, name):
-    el = context.browser.driver.find_element_by_css_selector("form[name={}] button[type=submit]".format(name))
+
+    el = context.browser.driver.find_element_by_css_selector("form[name={0}] button[type=submit], form[name={0}] input[type=submit]".format(name))
 
     assert el, "Submit button not found"
     assert el.is_enabled(), "Submit button is disabled"
