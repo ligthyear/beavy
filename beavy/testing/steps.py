@@ -68,5 +68,5 @@ def do_login(context):
         And I press "submit"
         Then the form "login_user_form" should be gone within 5 seconds
     """.format(first_step=first_step,
-               email=user.email,
-               password="password"))
+               email=user["email"],
+               password=user["password"]))
