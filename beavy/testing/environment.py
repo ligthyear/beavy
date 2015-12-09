@@ -14,6 +14,15 @@ log = logging.Logger(__name__)
 BEHAVE_DEBUG_ON_ERROR = not os.getenv("CI", False)
 BEHAVE_ERROR_ON_BROWSER_WARNINGS = os.getenv("BEHAVE_ERROR_ON_BROWSER_WARNINGS", not BEHAVE_DEBUG_ON_ERROR)  # noqa
 
+PROJECT_ROOT = os.path.dirname(os.path.dirname(
+    os.path.dirname(os.path.abspath(__file__))))
+
+
+def ensure_test_dir(x):
+    dirname = os.path.join(PROJECT_ROOT, 'var', 'test', x)
+    os.makedirs(dirname, exist_ok=True)
+    return dirname
+
 
 def before_all(context):
     context.default_browser = os.getenv("BEHAVE_DEFAULT_BROWSER", 'chrome')
@@ -22,6 +31,12 @@ def before_all(context):
     default_url = "http://localhost:{}".format(app.config.get("DEBUG", False)
                                                and "2992" or "5000")
     context.base_url = os.getenv("BEHAVE_BASE_URL", default_url)
+
+    context.screenshots_dir = ensure_test_dir('screenshots')
+    context.attachment_dir = ensure_test_dir('attachments')
+    context.sms_path = ensure_test_dir('sms')
+    context.gcm_path = ensure_test_dir('gcm')
+    context.mail_path = ensure_test_dir('mail')
 
     benv.before_all(context)
 
