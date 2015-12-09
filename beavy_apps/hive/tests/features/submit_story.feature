@@ -16,3 +16,6 @@ Feature: Submitting a story
           And I click the submit button of form "submit_story_form"
         Then the form "submit_story_form" should be gone within 5 seconds
           And I should see "Beavy is awesome"
+        And I click the link to "/latest/"
+          Then the browser's URL should be "/latest/"
+          Then I should see "Beavy is awesome"
