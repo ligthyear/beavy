@@ -51,6 +51,9 @@ TEST: &test
   SECRET_KEY: "TEST_DONT_EVER_USE"
   RATELIMIT_ENABLED: False
   LOGIN_DISABLED: False
+  MAIL_SERVER: localhost
+  MAIL_PORT: 8025
+  MAIL_SUPPRESS_SEND: False
 
 PRODUCTION: &production
   <<: *common

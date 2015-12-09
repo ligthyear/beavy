@@ -6,6 +6,9 @@ from behaving.mail.steps import *
 from behaving.notifications.gcm.steps import *
 from behaving.personas.steps import *
 
+from uuid import uuid4
+from .database import generate_new_persona
+
 
 @when('I go to HOME')
 def go_to_home(context):
@@ -48,6 +51,50 @@ def click_the_submit_button(context, name):
 @step('The form "{name}" should be gone within {timeout:d} seconds')
 def should_not_see_form_with_timeout(context, name, timeout):
     assert context.browser.is_element_not_present_by_css("form[name={}]".format(name), wait_time=timeout), 'Form {} was found'.format(name)
+
+
+@then('I should see iframe "{name}"')
+def should_see_iframe(context, name):
+    assert context.browser.is_element_present_by_css("iframe[name={}]".format(name)), 'Iframe {} not found'.format(name)
+
+
+@then('I should see iframe "{name}" within {timeout:d} seconds')
+def should_see_iframe_with_timeout(context, name, timeout):
+    assert context.browser.is_element_present_by_css("iframe[name={}]".format(name), wait_time=timeout), 'iframe {} not found'.format(name)
+
+
+@when('I switch to iframe "{name}"')
+def should_see_form_with_timeout(context, name):
+    context.browser.driver.switch_to_frame(name)
+
+
+@then('I should see an element with name "{name}" within {timeout:d} seconds')
+def should_see_iframe_with_timeout(context, name, timeout):
+    assert context.browser.is_element_present_by_css("*[name={}]".format(name), wait_time=timeout), 'element {} not found'.format(name)
+
+
+@then('I should see an element with name "{name}"')
+def should_see_iframe_with_timeout(context, name):
+    assert context.browser.is_element_present_by_css("*[name={}]".format(name)), 'element {} not found'.format(name)
+
+@given("I am logged out")
+def do_logout(context):
+    context.execute_steps("""
+    When I delete the cookie "session"
+    """)
+
+
+@given("I am a random new persona")
+def generate_new_random_persona(context):
+    assert not context.persona
+    username = uuid4().hex
+    while username in context.personas:
+        username = uuid4().hex
+
+    context.personas[username] = generate_new_persona(name=username, email="test-{}@test.beavy.xyz".format(username))
+
+    context.execute_steps('Given "{}" as the persona'.format(username))
+
 
 @given("I am logged in")
 def do_login(context):
