@@ -34,13 +34,14 @@ export default function paginate ({ types, mapActionToKey }) {
         const incoming = action.response[key]
         return merge({}, state, {
           isFetching: false,
-          data: union(state.data, incoming.data),
-          meta: merge(state.meta, incoming.meta),
-          links: merge(state.links, incoming.links)
+          data: union(state.data || [], incoming.data),
+          meta: merge(state.meta || {}, incoming.meta),
+          links: merge(state.links || [], incoming.links)
         })
       case failureType:
         return merge({}, state, {
-          isFetching: false
+          isFetching: false,
+          error: action.response
         })
       default:
         return state
@@ -56,7 +57,7 @@ export default function paginate ({ types, mapActionToKey }) {
         if (typeof key !== 'string') {
           throw new Error('Expected key to be a string.')
         }
-        return merge({}, state, updatePagination(state, action, key))
+        return merge({}, updatePagination(state, action, key))
       default:
         return state
     }
