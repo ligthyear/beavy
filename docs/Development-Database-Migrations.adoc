@@ -1,6 +1,6 @@
 = Database Migrations
 
-All changes to database schema are handeled with the Alembic, wrapped into [flask-migrate]. The modular concept of beavy makes that a little tricky. In order to keep the database clean on those things you want to have only, we are keeping all migrations that belong to their own modules models inside that model. Which means [alembic runs with multiple heads](http://alembic.readthedocs.org/en/latest/branches.html#running-with-multiple-bases) simultanously. That sounds complicated, but really isn't that much. It just means you need to be careful when creating migrations to place them in the right module with the right dependencies.
+All changes to database schema are handled with the Alembic, wrapped into [flask-migrate]. The modular concept of beavy makes that a little tricky. In order to keep the database clean on those things you want to have only, we are keeping all migrations that belong to their own modules models inside that model. Which means [alembic runs with multiple heads](http://alembic.readthedocs.org/en/latest/branches.html#running-with-multiple-bases) simultaneously. That sounds complicated, but really isn't that much. It just means you need to be careful when creating migrations to place them in the right module with the right dependencies.
 
 == Creating new database migrations
 
@@ -17,7 +17,7 @@ This will create a new version in `migrations/versions`. Please review it before
 
 == Creating migration within a module
 
-In order to ensure consistency between modules and main, you need to specify the current version as a depency for migrations in modules. for that, first find the current revision of the main project:
+In order to ensure consistency between modules and main, you need to specify the current version as a dependency for migrations in modules. for that, first find the current revision of the main project:
 
 ```
 python manager.py db heads | grep beavy\)
@@ -30,10 +30,24 @@ In this example `242c2fd98af` is your head revision. Now copy that as a paramete
 python manager.py db migrate --head=beavy.likes@head
 ```
 
-This should create a new revision in `beavy_modules/likes/migrations` with all changes detected. We now need to add the dependency on main, for that open the newly created file. **And add `depens_on = "242c2fd98af"` in the header as `down_revision`**. And review the rest of the migration.
+This should create a new revision in `beavy_modules/likes/migrations` with all changes detected. We now need to add the dependency on main, for that open the newly created file. **And add `depends_on = "242c2fd98af"` in the header after `down_revision`**. And review the rest of the migration.
 
 Now this revision, although only included if the module is activated, will apply those revisions in the proper order. Try it:
 
 ```
 python manager.py db upgrade heads
 ```
+
+== Starting migrations for your own App
+
+Start by creating a "migrations" folder on the top level of your app within `beavy_apps/$APP/` . It should be listed under "Adding App migrations" when you run `python manager.py db heads` . This is where you'll be storing all your app specific migrations.
+
+Now, we let it generate a new migration based on latest core for us (mind you  to always replace `$APP` with your app):
+
+```
+python manager.py db migrate --head=beavy@head --branch-label beavy.$APP
+```
+
+This will create a new, empty migration file under migration/versions . Move that file into your apps migration folder. _Note_: you can also use "--autogenerate" if you already have changes it should prepopulated into that file at this point.
+
+Open this file now and **replace** `down_revision` with `depends_on` and add the following line after: `down_revision = None`. You now have migrations in your app. From here on out, you can use it works the same as for any other module migration (as mentioned above).
