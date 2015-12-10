@@ -26,7 +26,7 @@ function makePrefixUrlMaker (prefix) {
 }
 
 export const make_url = (function (cfg) {
-  const urlMakers = {}
+  const urlMakers = makePrefixUrlMaker('/')
   for (var key in cfg) {
     if (cfg.hasOwnProperty(key)) {
       urlMakers[key.toLowerCase()] = makePrefixUrlMaker(cfg[key])
