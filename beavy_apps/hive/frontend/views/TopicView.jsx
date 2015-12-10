@@ -2,7 +2,7 @@ import React, { Component, PropTypes } from 'react'
 import { connect } from 'react-redux'
 import { getStoreEntity } from 'utils'
 
-class LinkView extends Component {
+class TopicView extends Component {
 
   static propTypes = {
     dispatch: PropTypes.func,
@@ -28,4 +28,4 @@ function mapStateToProps (state, ownProps) {
 
 export default connect(
   mapStateToProps
-)(LinkView)
+)(TopicView)

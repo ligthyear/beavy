@@ -3,7 +3,7 @@ import { connect } from 'react-redux'
 import { make_url, getStoreEntity } from 'utils'
 import { Link } from 'react-router'
 
-class LinkListItem extends Component {
+class TopicListItem extends Component {
 
   static propTypes = {
     entry: PropTypes.shape({
@@ -30,4 +30,4 @@ export default connect(
     const entry = getStoreEntity(state, ownProps.entry)
     return {entry: entry}
   }
-)(LinkListItem)
+)(TopicListItem)
