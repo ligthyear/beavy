@@ -80,11 +80,11 @@ export default class InfiniteList extends Component {
   }
 
   componentDidMount () {
-    window.addEventListener('resize', this.handleResize)
+    window.addEventListener('resize', this.handleResize.bind(this))
   }
 
   componentDidUnmount () {
-    window.removeEventListener('resize', this.handleResize)
+    window.removeEventListener('resize', this.handleResize.bind(this))
   }
 
   componentWillReceiveProps (newProps) {
