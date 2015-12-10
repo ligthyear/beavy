@@ -22,10 +22,9 @@ class SubmitFormRaw extends Component {
           <label htmlFor='title'>title</label>
           <input required id='title' type='text' name='title' {...title} />
           {title.error && title.touched && <div>{title.error}</div>}
-          <label htmlFor='url'>url</label>
+          <label htmlFor='url'>url (optional)</label>
           <input id='url' type='text' name='url' {...url} />
           {url.error && url.touched && <div>{url.error}</div>}
-          <strong>or</strong>
           <label htmlFor='text'>text</label>
           <textarea {...text} />
           {text.error && text.touched && <div>{text.error}</div>}

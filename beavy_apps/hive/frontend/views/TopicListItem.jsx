@@ -9,17 +9,18 @@ class TopicListItem extends Component {
     entry: PropTypes.shape({
       type: PropTypes.string.isRequired,
       title: PropTypes.string.isRequired,
-      url: PropTypes.string.isRequired,
+      url: PropTypes.string,
+      comments_count: PropTypes.number,
       created_at: PropTypes.string.isRequired,
       id: PropTypes.number.isRequired
     })
   }
 
   render () {
-    return <Link to={make_url.object(this.props.entry.id)}>
+    return <Link to={make_url('t/' + this.props.entry.id + "/test")}>
           <div>
             <span>{this.props.entry.created_at}</span>
-            <h2>{this.props.entry.title || this.props.entry.title}</h2>
+            <h2>{this.props.entry.title} ({this.props.entry.comments_count})</h2>
           </div>
         </Link>
   }

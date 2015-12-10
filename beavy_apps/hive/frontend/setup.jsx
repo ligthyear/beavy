@@ -21,5 +21,5 @@ export function setupViews (Application) {
       <Route key='submit' name='submit' path='/submit/' component={SubmitView} />)
 
   addExtension('routes',
-            <Route key='link' name='link' path='/t/:linkId/(:slug)' component={TopicView} />)
+            <Route key='link' name='link' path='/t/:topicId/(:slug)' component={TopicView} />)
 }
