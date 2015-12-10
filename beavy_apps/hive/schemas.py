@@ -2,6 +2,7 @@ from beavy.common.paging_schema import makePaginationSchema
 from beavy.schemas.object import ObjectField
 # , Schema, fields
 from beavy.common.including_hyperlink_related import IncludingHyperlinkRelated
+from beavy_modules.url_extractor.schemas import BriefLinkSchema
 from marshmallow_jsonapi import Schema, fields
 from beavy.schemas.user import BaseUser
 
@@ -16,6 +17,8 @@ class TopicSchema(Schema):
     title = fields.String(attribute='title')
     slug = fields.String(attribute='slug')
     text = fields.String(attribute='cooked')
+
+    link = fields.Nested(BriefLinkSchema, attribute="link_meta")
 
     class Meta:
         type_ = TOPIC_ID  # Required
