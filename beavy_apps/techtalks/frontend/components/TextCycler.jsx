@@ -1,3 +1,7 @@
+/* eslint react/prop-types: 0 */
+// Seriously, ESLINT, why the F are you complainng about
+// the prop-types in this file?
+
 import React from 'react'
 import defaultStyles from 'components/TextCycler.scss'
 import classnames from 'classnames'
@@ -6,7 +10,7 @@ export const styles = defaultStyles
 
 export class TextTyper extends React.Component {
 
-  propTypes: {
+  static propTypes: {
     onDone: React.PropTypes.func.required,
     word: React.PropTypes.string.required,
     className: React.PropTypes.string,
@@ -72,7 +76,7 @@ export class TextTyper extends React.Component {
 
 export class TextCycler extends React.Component {
 
-  // propTypes: {
+  // static propTypes: {
   //   words: React.PropTypes.arrayOf(React.PropTypes.string)
   // }
 
