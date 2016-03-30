@@ -73,52 +73,6 @@ class Behave(Command):
 if has_behave:
     manager.add_command("behave", Behave())
 
-try:
-    import pytest
-    has_pytest = True
-except ImportError:
-    has_pytest = False
-
-
-def pytest(path=None, no_coverage=False, maxfail=0,  # noqa
-           debug=False, verbose=False):
-    import pytest
-
-    arguments = []
-
-    def add_path_with_coverage(x):
-        arguments.append("--cov={}".format(x))
-        arguments.append(x)
-
-    def simple_add(x):
-        arguments.append(x)
-
-    if maxfail:
-        arguments.append("--maxfail={}".format(maxfail))
-
-    if verbose:
-        arguments.append("-vv")
-
-    if debug:
-        arguments.append("--pdb")
-
-    if no_coverage:
-        add_path = simple_add
-    else:
-        arguments.extend(["--cov-config", ".coveragerc"])
-        add_path = add_path_with_coverage
-
-    if path:
-        add_path(path)
-    else:
-        add_path("beavy")
-        get_all_beavy_paths(add_path)
-
-    exit(pytest.main(arguments))
-
-if has_pytest:
-    manager.command(pytest)
-
 
 class GetPaths(Command):
     def run(self):

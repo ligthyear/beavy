@@ -85,7 +85,7 @@ def make_env(app):
 
 def setup_statics(app):
     files = dict(main_js="main.js", main_css="main.css")
-    if not app.debug:
+    if not app.debug and not app.testing:
         with open(os.path.join(STATIC_FOLDER, "manifest.json")) as r:
             manifest = json.load(r)
 
