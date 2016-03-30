@@ -7,7 +7,7 @@ from beavy.common.access_query import AccessQuery
 from itertools import chain
 from flask import abort
 
-from .user import User
+from .persona import Persona
 from beavy.app import db
 from collections import defaultdict
 
@@ -68,7 +68,7 @@ class Object(db.Model):
     created_at = db.Column('created_at', db.DateTime(), nullable=False,
                            server_default=func.now())
     payload = db.Column('payload', JSONB, nullable=True)
-    owner_id = db.Column(db.Integer, db.ForeignKey(User.id), nullable=False)
+    owner_id = db.Column(db.Integer, db.ForeignKey(Persona.id), nullable=False)
     belongs_to = db.Column(db.Integer, db.ForeignKey("objects.id"),
                            nullable=True)
     # children = db.relationship("Object", backref=db.backref('belongs_to',
@@ -76,7 +76,8 @@ class Object(db.Model):
 
     __mapper_args__ = {'polymorphic_on': discriminator}
 
-    owner = db.relationship(User, backref=db.backref('objects'))
+    owner = db.relationship(Persona, backref=db.backref('objects'),
+                            foreign_keys=owner_id)
 
 
 Object.__access_filters = defaultdict(list)

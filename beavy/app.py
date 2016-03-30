@@ -3,7 +3,7 @@ from flask.ext.sqlalchemy import SQLAlchemy
 from flask.ext.script import Manager
 from flask.ext.marshmallow import Marshmallow
 from flask.ext.migrate import Migrate, MigrateCommand
-from flask.ext.security import Security, SQLAlchemyUserDatastore, current_user
+from flask.ext.security import Security, current_user
 from flask.ext.security.utils import encrypt_password
 from flask.ext.cache import Cache
 from flask_mail import Mail
@@ -12,7 +12,9 @@ from flask_limiter.util import get_ipaddr
 from flask_admin import Admin, AdminIndexView
 
 from flask_social_blueprint.core import SocialBlueprint as SocialBp
+from beavy.infrastructure.user_store import UserStore
 from beavy.utils.deepmerge import deepmerge
+from kombu.utils import cached_property
 
 from flask_environments import Environments
 from pprint import pprint
@@ -26,8 +28,23 @@ import yaml
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 STATIC_FOLDER = os.path.join(BASE_DIR, '..', 'assets')
 
+
+class Beavy(Flask):
+
+    # Deprecated
+    # TODO: REMOVE BEFORE COMMIT
+    def get_system_persona(self):
+        return self.system_persona
+
+    def system_persona(self):
+        return Persona.query.get(self.system_persona_id).first()
+
+    @property
+    def system_persona_id(self):
+        return int(app.config.get("SYSTEM_ORGANISATION_ID", -1))
+
 # The app
-app = Flask(__name__,
+app = Beavy(__name__,
             static_url_path='/assets',
             static_folder=STATIC_FOLDER)
 
@@ -183,16 +200,18 @@ def get_locale():
 
 
 #  ------ Database setup is done after here ----------
-from beavy.models.user import User  # noqa
-from beavy.models.role import Role  # noqa
-from beavy.models.social_connection import SocialConnection  # noqa
+from beavy.models.persona import Persona, Role       # noqa
+from beavy.models.profile import Profile             # noqa
+from beavy.models.organisation import Organisation   # noqa
+from beavy.models.login import Login                 # noqa
+
 
 # Setup Flask-Security
-user_datastore = SQLAlchemyUserDatastore(db, User, Role)
+user_datastore = UserStore(db, Login, None)
 security = Security(app, user_datastore)
 
 # add social authentication
-SocialBlueprint.init_bp(app, SocialConnection, url_prefix="/_social")
+SocialBlueprint.init_bp(app, Login, url_prefix="/_login")
 
 # initialize admin backend
 admin = Admin(app,
@@ -204,8 +223,8 @@ admin = Admin(app,
 
 from beavy.common.admin_model_view import AdminModelView     # noqa
 # setup admin UI stuff
-admin.add_view(AdminModelView(User, db.session,
-                              name="Users",
+admin.add_view(AdminModelView(Persona, db.session,
+                              name="Personas",
                               menu_icon_type='glyph',
                               menu_icon_value='glyphicon-user'))
 
@@ -232,24 +251,36 @@ if app.debug:
     @app.before_first_request
     def ensure_users():
         from datetime import datetime    # noqa
-        admin_role = user_datastore.find_or_create_role('admin')
         pw = encrypt_password("password")
 
-        if not user_datastore.find_user(email="user@example.org"):
-            user_datastore.create_user(email="user@example.org",
-                                       confirmed_at=datetime.now(),
-                                       active=True,
-                                       password=pw)
+        system_organisation = app.get_system_persona()
+        if not system_organisation:
+            system_organisation = Organisation(
+                id=app.config.get("SYSTEM_ORGANISATION_ID", -1),
+                name="system")
+            db.session.add(system_organisation)
+            db.session.commit()
 
-        if not user_datastore.find_user(email="admin@example.org"):
-            user_datastore.add_role_to_user(
-                user_datastore.create_user(email="admin@example.org",
-                                           confirmed_at=datetime.now(),
-                                           active=True,
-                                           password=pw),
-                admin_role)
+        if not Login.query.filter_by(profile_id="user@example.org").first():
+            db.session.add(Login(provider="email",
+                           profile_id="user@example.org",
+                           access_token=pw,
+                           persona=Profile(confirmed_at=datetime.now(),
+                                           active=True)))
+            db.session.commit()
 
-        user_datastore.commit()
+        if not Login.query.filter_by(profile_id="admin@example.org").first():
+
+            admin = Login(provider="email", profile_id="admin@example.org",
+                          access_token=pw,
+                          persona=Profile(confirmed_at=datetime.now(),
+                                          active=True))
+            db.session.add(admin)
+            db.session.commit()
+            db.session.add(Role(source_id=admin.persona_id,
+                                target_id=system_organisation.id,
+                                role="admin"))
+            db.session.commit()
 
     @app.before_first_request
     def print_routes():

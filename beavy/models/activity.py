@@ -5,7 +5,7 @@ from collections import defaultdict
 from beavy.app import db
 from enum import Enum, unique
 from .object import Object
-from .user import User
+from .persona import Persona
 
 
 class Activity(db.Model):
@@ -20,18 +20,22 @@ class Activity(db.Model):
     query_class = AccessQuery
 
     id = db.Column(db.Integer, primary_key=True)
-    subject_id = db.Column(db.Integer, db.ForeignKey(User.id), nullable=False)
+    subject_id = db.Column(db.Integer,
+                           db.ForeignKey(Persona.id),
+                           nullable=False)
     discriminator = db.Column('verb', db.String(100), nullable=False)
     created_at = db.Column('created_at', db.DateTime(), nullable=False,
                            server_default=func.now())
     object_id = db.Column(db.Integer, db.ForeignKey("objects.id"),
                           nullable=True)
-    whom_id = db.Column(db.Integer, db.ForeignKey(User.id), nullable=True)
+    whom_id = db.Column(db.Integer,
+                        db.ForeignKey(Persona.id),
+                        nullable=True)
     payload = db.Column('payload', JSONB, nullable=True)
 
     __mapper_args__ = {'polymorphic_on': discriminator}
 
-    subject = db.relationship(User, backref=db.backref("activities"),
+    subject = db.relationship(Persona, backref=db.backref("activities"),
                               foreign_keys=subject_id)
     object = db.relationship(Object, backref=db.backref("activities"))
 

@@ -1,5 +1,5 @@
 from beavy.models.object import Object
-from beavy.models.object import User
+from beavy.models.user import User
 from beavy.common.payload_property import PayloadProperty
 from beavy.utils.url_converters import ModelConverter
 
