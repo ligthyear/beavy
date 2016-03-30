@@ -166,7 +166,7 @@ class Login(db.Model):
             return self.persona
 
         for persona in self.persona.personas:
-            if requested_idenity == persona.id or \
+            if requested_idenity == str(persona.id) or \
                requested_idenity == persona.name:
                 # Should we check the "roles" here?
                 return persona

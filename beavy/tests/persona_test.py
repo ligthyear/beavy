@@ -2,7 +2,10 @@ from beavy.app import app, db
 from beavy.models.persona import Persona, Role
 from beavy.models.profile import Profile
 from beavy.models.organisation import Organisation
+from werkzeug.exceptions import BadRequest
 from beavy.models.login import Login
+
+import pytest
 
 
 def test_default_current_persona(testapp, db_session):
@@ -73,3 +76,48 @@ def test_login_roles(testapp, db_session):
         assert groupie.is_staff is False
         assert admin.is_staff is True
         assert mod.is_staff is True
+
+
+
+def _gen_member(db_session):
+    group = Organisation(id=20203, name="test_group")
+
+    # no membership
+    groupie = Login(provider="test", profile_id="normal", persona=Profile())
+    db_session.add(group)
+    db_session.add(groupie)
+
+    db_session.commit()
+
+    db_session.add(Role(source_id=groupie.persona_id,
+                        target_id=group.id,
+                        role="member"))
+    db_session.commit()
+    return (groupie, group)
+
+def test_current_persona_id(testapp, db_session):
+    member, group = _gen_member(db_session)
+    with testapp.test_request_context(headers={"X-Act-As-Identity": group.id}):
+        member.current_persona == group
+
+
+def test_current_persona_id_string(testapp, db_session):
+    member, group = _gen_member(db_session)
+    with testapp.test_request_context(headers={"X-Act-As-Identity": "{}".format(group.id)}):
+        member.current_persona == group
+
+def test_current_persona_name(testapp, db_session):
+    member, group = _gen_member(db_session)
+    with testapp.test_request_context(headers={"X-Act-As-Identity": group.name}):
+        member.current_persona == group
+
+def test_current_persona_name(testapp, db_session):
+    member, group = _gen_member(db_session)
+    with testapp.test_request_context(headers={"X-Act-As-Identity": group.name}):
+        member.current_persona == group
+
+@pytest.mark.xfail(raises=BadRequest)
+def test_current_persona_fails(testapp, db_session):
+    member, group = _gen_member(db_session)
+    with testapp.test_request_context(headers={"X-Act-As-Identity": 123}):
+        member.current_persona == False
