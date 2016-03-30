@@ -1,0 +1,73 @@
+= Doing the pip
+
+While most projects just have one `requirements.txt`-file in their root folder, we have requirements files all over the place, which are automatically collected and installed by the handy `python install.py` command. Unfortunately, this also means adding or updating packages isn't as trivial as in other projects. This document wants to guide you through that process and in doing so explain the system and its ideas.
+
+
+== Structure of requirement-files
+
+As for almost everything in beavy, requirements files can be shipped with core, any module or app. That's why we have the handy `install.py` file to find all necessary requirement files depending on the configuration and bundle them to one big command to execute – to make sure we don't have conflicting dependencies.
+
+Most dependencies are currently found in core itself under `beavy/requirements`. You'll find three files there: `base.txt`, `dev.txt` and `production.txt`. As the name suggests base is always used and dev and production will be used depending on the environment they are to be used in. The main difference between that is that production provides some infrastructure services we use (namely `gunicorn`) while dev contains a lot of debugging and development tools we don't want to have in production.
+
+So, the most important questions has to be: which environment do you want to make the changes to.
+
+== Making changes.
+
+The process isn't usual but straight forward: before you do any changes, create a freeze-file (a file of all currently installed packages), then do the changes, create a new freeze file, compare the two and put the updates into the appropriate requirements file.
+
+Let's assume, we want to update flask-social-blueprint – which is part of `core/base.txt`. So, before we do anything, we create a freeze file (in the virtualenv environment):
+
+```bash
+pip freeze > before.txt
+```
+
+Then we do our change:
+```bash
+pip install --upgrade flask-social-blueprint
+````
+
+Then we create the after file and compare the two:
+```
+pip freeze > after.txt
+diff -u before.txt after.txt > patch.txt
+```
+
+In this example the `patch.txt` file now contains:
+
+```
+--- before.txt	2016-03-29 16:00:09.000000000 +0000
++++ after.txt	2016-03-29 16:38:48.000000000 +0000
+@@ -1,17 +1,17 @@
+-Babel==2.1.1
++Babel==2.2.0
+ Flask==0.10.1
+ Flask-Admin==1.3.0
+ Flask-Babel==0.9
+ Flask-CLI==0.2.1
+ Flask-Cache==0.13.1
+ Flask-DebugToolbar==0.10.0
+@@ -50,10 +50,10 @@
+ fake-factory==0.5.2
+ flake8==2.5.0
+ flask-marshmallow==0.6.1
+-flask-social-blueprint==0.7
++flask-social-blueprint==0.7.2
+ future==0.15.2
+ gnureadline==6.3.3
+-google-api-python-client==1.4.2
++google-api-python-client==1.5.0
+ gunicorn==19.4.5
+ html5lib==1.0b3
+ httplib2==0.9.2
+@@ -71,7 +71,7 @@
+ mimerender==0.5.5
+ mixer==5.2.2
+ oauth2==1.9.0.post1
+-oauth2client==1.5.0
++oauth2client==2.0.1
+ oauthlib==1.0.3
+ parse==1.6.6
+ parse-type==0.3.4
+```
+
+Aside from that specific change a few other things needed updates. So we take each occurrence and replace them in the `base.txt` and commit that. Done.
