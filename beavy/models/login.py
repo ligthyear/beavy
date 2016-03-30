@@ -62,6 +62,7 @@ class Login(db.Model):
     last_login_ip = ProxyProperty("last_login_ip")
     current_login_ip = ProxyProperty("current_login_ip")
     login_count = ProxyProperty("login_count")
+    language_preference = ProxyProperty("language_preference")
 
     def get_user(self):
         return self.persona
