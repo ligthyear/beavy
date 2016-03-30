@@ -36,10 +36,17 @@ class Beavy(Flask):
     def get_system_persona(self):
         return self.system_persona
 
-    def system_persona(self):
-        return Persona.query.get(self.system_persona_id).first()
-
     @property
+    def system_persona(self):
+        persona = Persona.query.get(self.system_persona_id)
+        if not persona:
+            persona = Organisation(id=self.system_persona_id,
+                                   name="system")
+            db.session.add(persona)
+            db.session.commit()
+        return persona
+
+    @cached_property
     def system_persona_id(self):
         return int(app.config.get("SYSTEM_ORGANISATION_ID", -1))
 
@@ -253,14 +260,6 @@ if app.debug:
         from datetime import datetime    # noqa
         pw = encrypt_password("password")
 
-        system_organisation = app.get_system_persona()
-        if not system_organisation:
-            system_organisation = Organisation(
-                id=app.config.get("SYSTEM_ORGANISATION_ID", -1),
-                name="system")
-            db.session.add(system_organisation)
-            db.session.commit()
-
         if not Login.query.filter_by(profile_id="user@example.org").first():
             db.session.add(Login(provider="email",
                            profile_id="user@example.org",
@@ -278,7 +277,9 @@ if app.debug:
             db.session.add(admin)
             db.session.commit()
             db.session.add(Role(source_id=admin.persona_id,
-                                target_id=system_organisation.id,
+                                # if system persona didn't exist yet
+                                # it will now:
+                                target_id=app.system_persona.id,
                                 role="admin"))
             db.session.commit()
 

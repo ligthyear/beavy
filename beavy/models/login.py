@@ -1,4 +1,5 @@
 from flask_babel import gettext as _
+from werkzeug.exceptions import BadRequest
 from sqlalchemy import orm, func
 from ..app import db, app
 from .persona import Persona, Role
@@ -80,6 +81,7 @@ class Login(db.Model):
 
     @cached_property
     def roles(self):
+        # Should this go to "current_persona"?
         from beavy.app import app
         system_role = Role.query.filter_by(source_id=self.persona.id,
                                            target_id=app.system_persona_id
@@ -88,6 +90,9 @@ class Login(db.Model):
             return [system_role]
         return []
 
+    @property
+    def is_staff(self):
+        return self.roles != []
     #
     # ------------------------ END FLASK SECURITY --------------------
     #
@@ -151,3 +156,20 @@ class Login(db.Model):
     def with_one_time_token(cls, token):
         return cls.query.filter(cls.provider == "onetimetoken",
                                 cls.access_token == token).first()
+
+    @cached_property
+    def current_persona(self):
+        from beavy.app import app, request
+
+        requested_idenity = request.headers.get("X-Act-As-Identity", None)
+        if not requested_idenity:
+            return self.persona
+
+        for persona in self.persona.personas:
+            if requested_idenity == persona.id or \
+               requested_idenity == persona.name:
+                # Should we check the "roles" here?
+                return persona
+
+        else:
+            raise BadRequest("You are asking to act as an entity you can't access.")
