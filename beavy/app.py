@@ -1,8 +1,6 @@
 from flask import Flask, session, url_for, redirect, json, request
 from flask.ext.sqlalchemy import SQLAlchemy
-from flask.ext.script import Manager
 from flask.ext.marshmallow import Marshmallow
-from flask.ext.migrate import Migrate, MigrateCommand
 from flask.ext.security import Security, current_user
 from flask.ext.security.utils import encrypt_password
 from flask.ext.cache import Cache
@@ -161,16 +159,8 @@ celery = make_celery(app)
 
 # start database
 db = SQLAlchemy(app)
-# and database migrations
-migrate = Migrate(app, db)
-
 # initialize Resource-Based API-System
 ma = Marshmallow(app)
-
-# scripts manager
-manager = Manager(app)
-# add DB+migrations commands
-manager.add_command('db', MigrateCommand)
 
 # initialize email support
 mail = Mail(app)
