@@ -1,6 +1,6 @@
 from flask_babel import gettext as _
 from werkzeug.exceptions import BadRequest
-from sqlalchemy import orm, func
+from sqlalchemy import orm, func, select, or_
 from ..app import db, app
 from .persona import Persona, Role
 from .profile import Profile
@@ -159,17 +159,25 @@ class Login(db.Model):
 
     @cached_property
     def current_persona(self):
-        from beavy.app import app, request
+        from beavy.app import request
 
-        requested_idenity = request.headers.get("X-Act-As-Identity", None)
-        if not requested_idenity:
+        requested_identity = request.headers.get("X-Act-As-Identity", None)
+        if not requested_identity:
             return self.persona
 
-        for persona in self.persona.personas:
-            if requested_idenity == str(persona.id) or \
-               requested_idenity == persona.name:
-                # Should we check the "roles" here?
-                return persona
+        persona_query = Persona.query.filter(Persona.id.in_(
+            select([self.persona.persona_graph.c.target_id])))
 
-        else:
+        try:
+            persona = persona_query.filter(or_(
+                Persona.id == int(requested_identity),
+                Persona.name == requested_identity)).first()
+        except ValueError:
+            persona = persona_query.filter(
+                Persona.name == requested_identity).first()
+
+        # Should we check the role we are having somehow?
+
+        if not persona:
             raise BadRequest("You are asking to act as an entity you can't access.")
+        return persona

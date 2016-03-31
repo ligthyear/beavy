@@ -9,7 +9,7 @@ import pytest
 
 
 def _gen_member(db_session):
-    group = Organisation(id=20203, name="test_group")
+    group = Organisation(name="test_group")
 
     # no membership
     groupie = Login(provider="test", profile_id="normal", persona=Profile())
@@ -98,30 +98,50 @@ def test_login_roles(testapp, db_session):
 
 def test_current_persona_id(testapp, db_session):
     member, group = _gen_member(db_session)
+    with testapp.test_request_context():
+        member.current_persona == member.persona
+
+
+def test_current_group_persona_id(testapp, db_session):
+    member, group = _gen_member(db_session)
     with testapp.test_request_context(headers={"X-Act-As-Identity": group.id}):
         member.current_persona == group
 
 
-def test_current_persona_id_string(testapp, db_session):
+def test_current_group_persona_id_string(testapp, db_session):
     member, group = _gen_member(db_session)
     with testapp.test_request_context(headers={"X-Act-As-Identity": "{}".format(group.id)}):
         member.current_persona == group
 
 
-def test_current_persona_name(testapp, db_session):
+def test_current_group_persona_name(testapp, db_session):
     member, group = _gen_member(db_session)
     with testapp.test_request_context(headers={"X-Act-As-Identity": group.name}):
         member.current_persona == group
 
 
-def test_current_persona_name(testapp, db_session):
+def test_current_group_persona_name(testapp, db_session):
     member, group = _gen_member(db_session)
     with testapp.test_request_context(headers={"X-Act-As-Identity": group.name}):
         member.current_persona == group
 
 
 @pytest.mark.xfail(raises=BadRequest)
-def test_current_persona_fails(testapp, db_session):
+def test_current_group_persona_fails(testapp, db_session):
     member, group = _gen_member(db_session)
     with testapp.test_request_context(headers={"X-Act-As-Identity": 123}):
         member.current_persona == False
+
+
+def test_higher_persona_test_id(testapp, db_session):
+    holding = Organisation(name="Higher Holding")
+    db_session.add(holding)
+
+    member, group = _gen_member(db_session)
+
+    db_session.add(Role(source_id=group.id,
+                        target_id=holding.id,
+                        role="member"))
+    db_session.commit()
+    with testapp.test_request_context(headers={"X-Act-As-Identity": holding.id}):
+        member.current_persona == holding
