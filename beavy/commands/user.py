@@ -20,6 +20,9 @@ UserCommand = Manager(usage="manage user objects")
 
 
 @UserCommand.command
+@UserCommand.option("", dest="password",
+                    help="The new password – automatically generated if" +
+                         " not provided")
 def create(email, password=None, **persona_info):
 
     if password:
@@ -45,6 +48,34 @@ def create(email, password=None, **persona_info):
     else:
         print("Profile and Login for {} created with password: {} ".format(
               email, pw))
+
+
+@UserCommand.command
+@UserCommand.option("", dest="password",
+                    help="The new password – automatically generated if" +
+                         " not provided")
+def set_password(email, password=None):
+
+    if password:
+        pw = password
+    else:
+        pw = ''.join(choice(CHARS) for _ in range(LENGTH))
+
+    login = db.session.query(Login).filter_by(provider="email",
+                                              profile_id=email).first()
+
+    if not login:
+        print("User Login {} not found".format(email))
+        exit(1)
+
+    login.access_token = encrypt_password(pw)
+    db.session.add(login)
+    db.session.commit()
+
+    if password:
+        print("Login password set for {}".format(email))
+    else:
+        print("Login password to {} for {}".format(pw, email))
 
 
 @UserCommand.command
