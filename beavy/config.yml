@@ -45,6 +45,7 @@ DEVELOPMENT: &development
 TEST: &test
   <<: *common
   TESTING: True
+  WTF_CSRF_ENABLED: False
   CELERY_BROKER_URL: redis://localhost:6379
   CELERY_RESULT_BACKEND: redis://localhost:6379
   SQLALCHEMY_DATABASE_URI: "postgresql://localhost/beavy-test"
