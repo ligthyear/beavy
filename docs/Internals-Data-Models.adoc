@@ -1,0 +1,7 @@
+= Data Models
+
+The data model in beavy is a highly customisable and flexible one, not only in the techniques used (Signle-Table-Inheritance and Postgres' JSONB) but further more in the abstracted concepts behind that. This part of the documentation wants to introduce and explain the ideas and concepts behind the beavy implementation and hopefully make you understand why it is how it is.
+
+== JSONB
+
+== Single Table Inheritance

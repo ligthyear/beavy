@@ -1,0 +1,31 @@
+= Personas
+
+We've talked about link:./Internals-Objects-and-Activities.adoc[Objects and Activities] and how we can use those to model complex data structures easily, however we brushed over one important part in the system before: the actor. Every `Object` in beavy has an owner and every Activity has a subject, someone, who acted. Classicly both of those would be bound to "user login" but beavy goes a different way with the persona system.
+
+== What's a persona
+
+Essentially the last part of the previous paragraph already stated it: a Persona is the actor within the system. Similarly to the `object`, persona here is more a broader concept and needs to have a specific implementation so it actually be used. The most simple example is that of a "Person", who is represented in the system. A person is of a Persona type and as such can own `objects` an has done `activities`. Let's take a simple example of a website collecting talks given at user groups and on conferences. For every presenter and speaker, you'd have a persona object that own the `presentation` object and may even has a "presented" `activity`.
+
+Similarly each conference object would have a publisher-persona, who owns it. However, while a speaker/presenter must be a natural person, a publisher can also be of a different type of persona – an `organisation` for example. That's the essential idea behind the abstract persona, to be able to represent different type of actors in the system easily.
+
+
+== Beavy "native" Personas
+
+Beavy ships with a set of personas it already needs for its basic to function. It comes with the following:
+
+ - **Person** (type: `Persona`) represents any kind of natural person, an individual human being
+ - **Organisation** (type: `Persona`) is any type of organisation or group that acts as one entity. In legal this is often understood as a "non natural person", like companies, associations, formal and informal entities. An organisation is typically a combination of other personas.
+ - **Bot** (type: `Persona`) is an automatic actor, like an algorithm or computer system.
+ - **Profile** (type: `Person`) is a natural person that has a login at the platform and is represented as a "user" within beavy – see the information about "login" a little further.
+
+=== System Organisation Persona
+
+There is always a global "system" persona within beavy. If it can't find any in the database when it starts, it will be created (typically with the id `-1`). All system can access that persona via the handy `beavy.app.app->system_persona`. The existence of this organisation persona is fundamental for many parts of the app and automatic processes, including the system roles (explained later).
+
+== Persona Access Tree and Roles
+
+As already mentioned previously, within beavy we understand that a person might actually be part of or composed of other personas. Take the System Organisation Persona for example – it is an organisation that is composed of all people, who are part of your organisation: moderators, sys admins, the office puppy. To reflect that idea, personas can have access to other persona and act in their name. This is managed through the `Roles`, a connection between one source persona, the target persona and the role that the one can take on the other. For example a SystemBot (type `Bot`) could have the access to the System Organisation persona with the role "admin". That means that bot can't only act as the bot itself but also as the system persona in all levels.
+
+This can go on for as many layers as you can image. You could model an entire multi-level company organisation chart like this with different devisions having different access levels upon acting "as the company persona". One persona could be part of the "BerlinTeam", which in turns is part of the "GermanyTeam", which in pair is part of the "MotherHolding", at each level given different access roles. And through that level, everything the upper level can access, the lower level can access, too. However, to what extent they can access/act as that persona is defined through their role. If they have only "view" roles, it means that though "BerlinTeam" can access all items owned by "GermanyTeam" (as it can "become" GermanyTeam), they can't create or edit any. And though BerlinTeam can become "GermanyTeam", unless the opposite is explictly defined, GermanyTeam has no access to items only owned by "BerlinTeam".
+
+It needs some getting used to, but isn't actually this hard to follow. The easiest is to always look from one source persona and create the entire tree of other personas and sub-personas they have access to recursively. 

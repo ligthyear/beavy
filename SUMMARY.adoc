@@ -31,6 +31,13 @@
 .. link:docs/Development-i18n.adoc[Internationalisation]
 .. link:docs/Development-Testing[Testing your Development]
 
+. link:docs/Internals.adoc[Understanding the Internals]
+.. link:docs/Internals-Data-Models.adoc[Data Models]
+... link:docs/Internals-Objects-and-Activities.adoc[Objects and Activities]
+.. link:docs/Internals-Personas.adoc[Personas]
+... link:docs/Internals-Personas.adoc[Login and Access Control]
+.. link:docs/Internals-JSONAPI.adoc[JSONApi]
+
 . link:docs/Contributing.adoc[Contributing]
 .. link:docs/Testing.adoc[Testing in Beavy]
 .. link:docs/Contributors.adoc[Contributors]
