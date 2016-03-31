@@ -6,15 +6,6 @@ os.environ["BEAVY_ENV"] = "TEST"
 from beavy.app import app, db
 
 
-def get_all_beavy_paths(fn):
-    fn("beavy")
-
-    for module in app.config.get("MODULES", []):
-        fn("beavy_modules/{}".format(module))
-
-    return fn("beavy_apps/{}".format(app.config["APP"]))
-
-
 def pytest_cmdline_preparse(args):
     # we only mess if nothing else is supplied
     if args != ["beavy"]:
@@ -28,9 +19,11 @@ def pytest_cmdline_preparse(args):
 
     args.extend(["--cov-config", ".coveragerc"])
 
-    get_all_beavy_paths(add_path_with_coverage)
 
+    for module in app.config.get("MODULES", []):
+        add_path_with_coverage("beavy_modules/{}".format(module))
 
+    add_path_with_coverage("beavy_apps/{}".format(app.config["APP"]))
 
 @pytest.fixture(scope='session')
 def testapp(request):
