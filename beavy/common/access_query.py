@@ -9,7 +9,7 @@ class AccessQuery(BaseQuery):
     PUBLIC_SQL = """(
             (payload::jsonb->'__access_control__'->>'public')::bool=true
         AND
-            belongs_to IS NULL
+            belongs_to_id IS NULL
     )"""
 
     def _gen_filters(self, class_, fltr):

@@ -101,7 +101,7 @@ def test_parent_persona_super_object_access(testapp, db_session):
     # someone else
     other = Login(provider="test", profile_id="other", persona=Profile())
     db_session.add(other)
-    db_session.add(TestObject(owner=other.persona, public=True, belongs_to=top_obj.id))
+    db_session.add(TestObject(owner=other.persona, public=True, belongs_to_id=top_obj.id))
     db_session.commit()
 
     with testapp.test_request_context() as t:

@@ -70,8 +70,8 @@ class Object(db.Model):
                            server_default=func.now())
     payload = db.Column('payload', JSONB, nullable=True)
     owner_id = db.Column(db.Integer, db.ForeignKey(Persona.id), nullable=False)
-    belongs_to = db.Column(db.Integer, db.ForeignKey("objects.id"),
-                           nullable=True)
+    belongs_to_id = db.Column(db.Integer, db.ForeignKey("objects.id"),
+                              nullable=True)
 
     public = PayloadProperty('public', '__access_control__')
     # children = db.relationship("Object", backref=db.backref('belongs_to',
@@ -80,6 +80,7 @@ class Object(db.Model):
     __mapper_args__ = {'polymorphic_on': discriminator}
 
     owner = db.relationship(Persona, foreign_keys=owner_id)
+    belongs_to = db.relationship("Object", foreign_keys=belongs_to_id)
 
 
 Object.__access_filters = defaultdict(list)
