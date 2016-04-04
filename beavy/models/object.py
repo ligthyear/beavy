@@ -73,9 +73,7 @@ class Object(db.Model):
     belongs_to_id = db.Column(db.Integer, db.ForeignKey("objects.id"),
                               nullable=True)
 
-    public = PayloadProperty('public', '__access_control__')
-    # children = db.relationship("Object", backref=db.backref('belongs_to',
-    #                                                         remote_side=id))
+    public = db.Column('public', db.Boolean, nullable=False, default=False)
 
     __mapper_args__ = {'polymorphic_on': discriminator}
 

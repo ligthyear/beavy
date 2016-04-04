@@ -7,7 +7,7 @@ from sqlalchemy.sql import text, or_
 class AccessQuery(BaseQuery):
 
     PUBLIC_SQL = """(
-            (payload::jsonb->'__access_control__'->>'public')::bool=true
+            public=true
         AND
             belongs_to_id IS NULL
     )"""
