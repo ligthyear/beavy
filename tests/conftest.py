@@ -8,10 +8,11 @@ from beavy.app import app, db
 
 def pytest_cmdline_preparse(args):
     # we only mess if nothing else is supplied
-    if args != ["beavy"]:
+    if args:
         return args
 
     args.insert(0, "-vv")
+    args.append("tests")
 
     def add_path_with_coverage(x):
         args.append("--cov={}".format(x))

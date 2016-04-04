@@ -3,6 +3,7 @@ from sqlalchemy.orm import contains_eager, aliased
 from enum import Enum, unique
 from sqlalchemy import func
 from flask.ext.security import current_user
+from beavy.common.payload_property import PayloadProperty
 from beavy.common.access_query import AccessQuery
 from itertools import chain
 from flask import abort
@@ -71,13 +72,14 @@ class Object(db.Model):
     owner_id = db.Column(db.Integer, db.ForeignKey(Persona.id), nullable=False)
     belongs_to = db.Column(db.Integer, db.ForeignKey("objects.id"),
                            nullable=True)
+
+    public = PayloadProperty('public', '__access_control__')
     # children = db.relationship("Object", backref=db.backref('belongs_to',
     #                                                         remote_side=id))
 
     __mapper_args__ = {'polymorphic_on': discriminator}
 
-    owner = db.relationship(Persona, backref=db.backref('objects'),
-                            foreign_keys=owner_id)
+    owner = db.relationship(Persona, foreign_keys=owner_id)
 
 
 Object.__access_filters = defaultdict(list)
