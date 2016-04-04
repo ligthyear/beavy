@@ -12,7 +12,6 @@ from flask_admin import Admin, AdminIndexView
 from flask_social_blueprint.core import SocialBlueprint as SocialBp
 from beavy.infrastructure.user_store import UserStore
 from beavy.utils.deepmerge import deepmerge
-from kombu.utils import cached_property
 
 from flask_environments import Environments
 from pprint import pprint
@@ -26,14 +25,14 @@ import yaml
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 STATIC_FOLDER = os.path.join(BASE_DIR, '..', 'assets')
 
+SYSTEM_ORGANISATION_ID = -1
+
 
 class Beavy(Flask):
 
-    # Deprecated
-    # TODO: REMOVE BEFORE COMMIT
-    def get_system_persona(self):
-        return self.system_persona
+    system_persona_id = SYSTEM_ORGANISATION_ID
 
+    # TODO: some form of caching would be nice...
     @property
     def system_persona(self):
         persona = Persona.query.get(self.system_persona_id)
@@ -43,10 +42,6 @@ class Beavy(Flask):
             db.session.add(persona)
             db.session.commit()
         return persona
-
-    @cached_property
-    def system_persona_id(self):
-        return int(app.config.get("SYSTEM_ORGANISATION_ID", -1))
 
 # The app
 app = Beavy(__name__,
