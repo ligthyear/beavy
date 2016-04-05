@@ -23,46 +23,6 @@ class Role(db.Model):
     def name(self):
         return self.role
 
-    #
-    # target = db.relationship("Persona", foreign_keys="target_id")
-    # source = db.relationship("Persona", foreign_keys="source_id")
-#
-# class Role(db.Model):
-#     __tablename__ = "persona_roles"
-#     table = db.Table('persona_roles',
-#                      db.Column('source_id',
-#                                db.Integer(),
-#                                db.ForeignKey("persona.id"),
-#                                nullable=False),
-#                      db.Column('target_id',
-#                                db.Integer(),
-#                                db.ForeignKey("persona.id"),
-#                                nullable=False),
-#                      db.Column('role',
-#                                db.String(20),
-#                                nullable=False),
-#                      db.PrimaryKeyConstraint('source_id', 'target_id'),
-#                      db.UniqueConstraint('source_id', 'target_id')
-#                      )
-
-#
-# class Role(db.Model):
-#     __tablename__ = "persona_roles"
-#     __table_args__ = (db.ForeignKeyConstraint(['source_id'], ['persona.id']),
-#                       db.ForeignKeyConstraint(['target_id'], ['persona.id']),
-#                       db.PrimaryKeyConstraint("source_id", "target_id"),
-#                       db.UniqueConstraint('source_id', 'target_id',
-#                                           name='unique_persona_roles'))
-#
-#     source_id = db.Column('source_id', db.Integer(),
-#                           db.ForeignKey("persona.id"),
-#                           nullable=False)
-#     target_id = db.Column('target_id', db.Integer(),
-#                           db.ForeignKey("persona.id"),
-#                           nullable=False)
-#     role = db.Column('role', db.String(20),
-#                      nullable=False),
-
 
 class Persona(db.Model):
     """
