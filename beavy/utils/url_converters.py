@@ -1,14 +1,14 @@
 from sqlalchemy.sql import or_
 from flask import abort
 from werkzeug.routing import BaseConverter
-from ..models.user import User
+from ..models.persona import Persona
 from ..models.activity import Activity
 from ..models.object import Object
 
 
 class ModelConverter(BaseConverter):
     __OBJECTS__ = {
-        'user': User,
+        'persona': Persona,
         'object': Object,
         'activity': Activity
     }
@@ -34,7 +34,7 @@ class ModelConverter(BaseConverter):
                                 ).first_or_404()
 
 
-class UserConverter(ModelConverter):
+class PersonaConverter(ModelConverter):
 
     def __init__(self, url_map):
-        super(UserConverter, self).__init__(url_map, obj="user")
+        super(PersonaConverter, self).__init__(url_map, obj="persona")

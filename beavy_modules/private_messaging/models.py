@@ -1,5 +1,5 @@
 from beavy.models.object import Object
-from beavy.models.user import User
+from beavy.models.persona import Persona
 from beavy.common.payload_property import PayloadProperty
 from beavy.utils.url_converters import ModelConverter
 
@@ -10,9 +10,9 @@ PM_ID = "private_message"
 
 # Define models
 PMParticipants = db.Table('{}_participants'.format(PM_ID),
-                          db.Column('user_id',
+                          db.Column('persona_id',
                                     db.Integer(),
-                                    db.ForeignKey(User.id),
+                                    db.ForeignKey(Persona.id),
                                     nullable=False),
                           db.Column('pm_id',
                                     db.Integer(),
@@ -28,7 +28,7 @@ class PrivateMessage(Object):
     title = PayloadProperty('title')
     # db.Column(db.String(255), nullable=False)
 
-    participants = db.relationship('User', secondary=PMParticipants,
+    participants = db.relationship('Persona', secondary=PMParticipants,
                                    backref=db.backref('{}s'.format(PM_ID),
                                                       lazy='dynamic'))
 

@@ -6,7 +6,8 @@ from collections import namedtuple
 from flask_security import current_user
 
 app.url_map.converters['model'] = url_converters.ModelConverter
-app.url_map.converters['user'] = url_converters.UserConverter
+app.url_map.converters['user'] = app.url_map.converters['persona'] = \
+    url_converters.PersonaConverter
 
 # LOAD all external modules
 load_modules_and_app(app)
