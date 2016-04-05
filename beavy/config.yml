@@ -49,6 +49,7 @@ TEST: &test
   CELERY_BROKER_URL: redis://localhost:6379
   CELERY_RESULT_BACKEND: redis://localhost:6379
   SQLALCHEMY_DATABASE_URI: "postgresql://localhost/beavy-test"
+  # SQLALCHEMY_ECHO: True
   SECURITY_PASSWORD_SALT: "__TEST"
   SECRET_KEY: "TEST_DONT_EVER_USE"
   RATELIMIT_ENABLED: False
