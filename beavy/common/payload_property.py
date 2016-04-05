@@ -3,12 +3,14 @@ from sqlalchemy.orm.attributes import flag_modified as sa_flag_modified
 
 class PayloadProperty(object):
 
-    def __init__(self, key, path=[], attribute='payload', force=True):
+    def __init__(self, key, path=[], attribute='payload', force=True,
+                 default=None):
         self.key = key
         self.attribute = attribute
         self.force = force
         self.path = isinstance(path, str) and path.split('.') or path
         self.flag_modified = sa_flag_modified
+        self.default = default
 
     def _findBase(self, obj):
         base = getattr(obj, self.attribute)
@@ -42,7 +44,7 @@ class PayloadProperty(object):
         base = self._findBase(obj)
         key = self.key
 
-        return base.get(key, None)
+        return base.get(key, self.default)
 
     def __set__(self, obj, value):
         self._findBase(obj)[self.key] = value

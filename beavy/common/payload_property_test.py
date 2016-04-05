@@ -10,6 +10,7 @@ class TestObject():
         self.payload = {}
 
     title = PayloadProperty("title")
+    defaulting_item = PayloadProperty("title", default="Quality Coffee")
     header_o = PayloadProperty("other", "content.header")
     header_p = PayloadProperty("p", "content.header")
 
@@ -21,6 +22,14 @@ def test_simple(mocker):
     t.title = "test"
     assert t.payload == {'title': 'test'}
     TestObject.title.flag_modified.assert_called_once_with(t, "payload")
+
+
+def test_default(mocker):
+    TestObject.title.flag_modified = mocker.MagicMock()
+    t = TestObject()
+    assert t.payload == {}
+    assert t.defaulting_item == "Quality Coffee"
+    assert t.payload == {}
 
 
 def test_deeper(mocker):
