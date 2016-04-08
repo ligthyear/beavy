@@ -15,7 +15,7 @@ class TestObject(Object):
 
 
 def _gen_owner(db_session):
-    group = Organisation(id=1999, name="test_group")
+    group = Organisation()
 
     # no membership
     groupie = Login(provider="test", profile_id="normal", persona=Profile())
@@ -91,6 +91,43 @@ def test_parent_persona_object_access(testapp, db_session):
         # we should find two accessible objects
         # one from the user, one from the group
         assert Object.query.accessible.count() == 2
+
+
+
+def test_grand_parent_persona_object_access(testapp, db_session):
+    # building a complex persona tree:
+    grand, grand_group, _ = _gen_owner(db_session)
+    dad, dad_group, _ = _gen_owner(db_session)
+    kid, kid_group, _ = _gen_owner(db_session)
+
+
+    # kid_group can access everything dad_group can access
+    db_session.add(Role(source_id=kid_group.id,
+                        target_id=dad_group.id,
+                        role="member"))
+
+    # and dad_group can access everything grand_group can access
+    db_session.add(Role(source_id=dad_group.id,
+                        target_id=grand_group.id,
+                        role="member"))
+
+    db_session.commit()
+
+
+    with testapp.test_request_context() as t:
+        t.user = grand
+        # grand does only have his level
+        assert Object.query.accessible.count() == 1
+
+    with testapp.test_request_context() as t:
+        t.user = dad
+        # dad has a level more
+        assert Object.query.accessible.count() == 2
+
+    with testapp.test_request_context() as t:
+        t.user = kid
+        # kid has three levels of access
+        assert Object.query.accessible.count() == 3
 
 # THIS isn't properly implemented yet, hence a failing test
 # we know about.

@@ -1,5 +1,6 @@
 from sqlalchemy import func
 from beavy.app import db
+from sqlalchemy.sql import text, select
 
 
 class Role(db.Model):
@@ -49,3 +50,43 @@ class Persona(db.Model):
                                backref="accessors",
                                primaryjoin=id == Role.__table__.c.source_id,
                                secondaryjoin=id == Role.__table__.c.target_id)
+
+    @property
+    def persona_graph(self):
+        """
+        Return a CTE query, which selects all personas and roles the
+        persona can act as.
+        """
+
+        # Unfortunately it appears sqlalchemy doesn't allow recursive CTE
+        # for FROM-AS-TEXT-Clause selects (as of v 1.0.12):
+        # https://github.com/zzzeek/sqlalchemy/blob/master/test/sql/test_cte.py
+        # for the record, this was the starting SQL we used:
+        # ORIGINAL_SQL = """
+        #   -- Initial Records
+        #     SELECT pr.source_id,
+        #            pr.target_id,
+        #            pr.role
+        #       FROM persona_roles pr
+        #       WHERE pr.source_id = :__persona_id
+        #   UNION
+        #   -- Recursive Term
+        #     SELECT pr.source_id,
+        #            pr.target_id,
+        #            pr.role
+        #       FROM persona_roles as pr
+        #       JOIN persona_graph as pg
+        #         ON (pg.target_id = pr.source_id)
+        # """).bindparams(__persona_id=self.id
+        #    ).columns(source_id=db.Integer, target_id=db.Integer,
+        #              role=db.String
+        #    ).cte("persona_graph", recursive=True)
+        #
+
+        top_query = Role.query.filter(Role.source_id == self.id
+                                      ).cte(name="persona_graph",
+                                            recursive=True)
+
+        top_aliased = top_query.alias()
+        return top_query.union(Role.query.join(top_aliased,
+                               Role.source_id == top_aliased.c.target_id))

@@ -26,13 +26,14 @@ class AccessQuery(BaseQuery):
         if not has_request_context() or not current_user.is_authenticated:
             return self.filter(text(self.PUBLIC_SQL))
 
-        return self.filter(text("""{} OR (
+        persona = current_user.current_persona
+
+        return self.select_from(persona.persona_graph).filter(text("""{} OR (
             owner_id =:__owner_id
             OR
-            owner_id in (SELECT target_id from persona_roles
-                            where source_id = :__owner_id)
+            owner_id in (SELECT target_id from persona_graph)
         )""".format(self.PUBLIC_SQL))
-            ).params(__owner_id=current_user.current_persona.id)
+            ).params(__owner_id=persona.id)
 
     def filter_visible(self, attr, remoteAttr):
         filters = self._gen_filters(remoteAttr.class_, 'view')
