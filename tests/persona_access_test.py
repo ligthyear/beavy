@@ -129,9 +129,7 @@ def test_grand_parent_persona_object_access(testapp, db_session):
         # kid has three levels of access
         assert Object.query.accessible.count() == 3
 
-# THIS isn't properly implemented yet, hence a failing test
-# we know about.
-@pytest.mark.xfail(raises=AssertionError)
+
 def test_parent_persona_super_object_access(testapp, db_session):
     member, group, top_obj = _gen_owner(db_session)
 
@@ -144,5 +142,5 @@ def test_parent_persona_super_object_access(testapp, db_session):
     with testapp.test_request_context() as t:
         t.user = member
         # we should find two accessible objects
-        # one from the user, one from the group
+        # one from the user, one through the access point
         assert Object.query.accessible.count() == 2

@@ -34,22 +34,14 @@ class AccessQuery(BaseQuery):
         persona_graph = persona.persona_graph
         slc = self._primary_entity.selectable
 
-        from beavy.app import db
-
-        print(db.session.query(persona_graph.c.target_id).all())
-        print(db.session.query(slc.c.owner_id).all())
-        print(db.session.query(slc.c.owner_id.in_(select([persona_graph.c.target_id]))).all())
-
-        return slc.select().where(or_(
+        top_query = slc.select().where(or_(
             text(self.PUBLIC_SQL), or_(
                 slc.c.owner_id == persona.id, slc.c.owner_id.in_(select([persona_graph.c.target_id]))
             ))).cte(name="accessible_items_graph", recursive=True)
         top_aliased = top_query.alias()
         two = slc.select().select_from(slc.join(
             top_aliased, slc.c.belongs_to_id == top_aliased.c.id))
-        unioned = top_query.union(two)
-        print(db.session.query(unioned.c.id).all())
-        return unioned
+        return top_query.union(two)
 
     @property
     def accessible(self):
