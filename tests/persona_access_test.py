@@ -96,19 +96,19 @@ def test_parent_persona_object_access(testapp, db_session):
 
 def test_grand_parent_persona_object_access(testapp, db_session):
     # building a complex persona tree:
-    grand, grand_group, _ = _gen_owner(db_session)
-    dad, dad_group, _ = _gen_owner(db_session)
-    kid, kid_group, _ = _gen_owner(db_session)
+    grand, _, _ = _gen_owner(db_session)
+    dad, _, _ = _gen_owner(db_session)
+    kid, _, _ = _gen_owner(db_session)
 
 
-    # kid_group can access everything dad_group can access
-    db_session.add(Role(source_id=kid_group.id,
-                        target_id=dad_group.id,
+    # kid can access everything dad can access
+    db_session.add(Role(source_id=kid.persona.id,
+                        target_id=dad.persona.id,
                         role="member"))
 
-    # and dad_group can access everything grand_group can access
-    db_session.add(Role(source_id=dad_group.id,
-                        target_id=grand_group.id,
+    # and dad can access everything grand can access
+    db_session.add(Role(source_id=dad.persona.id,
+                        target_id=grand.persona.id,
                         role="member"))
 
     db_session.commit()

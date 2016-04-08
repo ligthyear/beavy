@@ -1,7 +1,7 @@
 from flask.ext.sqlalchemy import BaseQuery
 from flask.ext.security import current_user
 from flask import has_request_context
-from sqlalchemy.sql import text, or_
+from sqlalchemy.sql import text, or_, select
 
 
 class AccessQuery(BaseQuery):
@@ -21,19 +21,42 @@ class AccessQuery(BaseQuery):
             )
         ]
 
+
+        # top_query = Role.query.filter(Role.source_id == self.id
+        #                               ).cte(name="persona_graph",
+        #                                     recursive=True)
+        #
+        # top_aliased = top_query.alias()
+        # return top_query.union(Role.query.join(top_aliased,
+        #                        Role.source_id == top_aliased.c.target_id))
+
+    def _items_subquery(self, persona):
+        persona_graph = persona.persona_graph
+        slc = self._primary_entity.selectable
+
+        from beavy.app import db
+
+        print(db.session.query(persona_graph.c.target_id).all())
+        print(db.session.query(slc.c.owner_id).all())
+        print(db.session.query(slc.c.owner_id.in_(select([persona_graph.c.target_id]))).all())
+
+        return slc.select().where(or_(
+            text(self.PUBLIC_SQL), or_(
+                slc.c.owner_id == persona.id, slc.c.owner_id.in_(select([persona_graph.c.target_id]))
+            ))).cte(name="accessible_items_graph", recursive=True)
+        top_aliased = top_query.alias()
+        two = slc.select().select_from(slc.join(
+            top_aliased, slc.c.belongs_to_id == top_aliased.c.id))
+        unioned = top_query.union(two)
+        print(db.session.query(unioned.c.id).all())
+        return unioned
+
     @property
     def accessible(self):
         if not has_request_context() or not current_user.is_authenticated:
             return self.filter(text(self.PUBLIC_SQL))
 
-        persona = current_user.current_persona
-
-        return self.select_from(persona.persona_graph).filter(text("""{} OR (
-            owner_id =:__owner_id
-            OR
-            owner_id in (SELECT target_id from persona_graph)
-        )""".format(self.PUBLIC_SQL))
-            ).params(__owner_id=persona.id)
+        return self.filter(self._primary_entity.selectable.c.id.in_(select([self._items_subquery(current_user.current_persona).c.id])))
 
     def filter_visible(self, attr, remoteAttr):
         filters = self._gen_filters(remoteAttr.class_, 'view')
