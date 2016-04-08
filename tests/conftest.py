@@ -2,9 +2,22 @@ import os
 import pytest
 import sys
 
+
+if os.environ.get("WITH_SQL", False):
+    # SHOW all debug info of SQL streams
+    import logging
+
+    ch = logging.StreamHandler()
+    ch.setLevel(logging.DEBUG)
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    ch.setFormatter(formatter)
+
+    logger = logging.getLogger('sqlalchemy.engine')
+    logger.setLevel(logging.DEBUG)
+    logger.addHandler(ch)
+
 os.environ["BEAVY_ENV"] = "TEST"
 from beavy.app import app, db
-
 
 def pytest_cmdline_preparse(args):
     # we only mess if nothing else is supplied
@@ -43,8 +56,9 @@ def testapp(request):
 @pytest.fixture(scope='function')
 def db_session(request):
     """Creates a new database session for a test."""
-    connection = db.engine.connect()
     db.create_all()
+
+    connection = db.engine.connect()
     transaction = connection.begin()
 
     session = db.create_scoped_session(options=dict(bind=connection))
