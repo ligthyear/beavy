@@ -144,3 +144,51 @@ def test_parent_persona_super_object_access(testapp, db_session):
         # we should find two accessible objects
         # one from the user, one through the access point
         assert Object.query.accessible.count() == 2
+
+
+def test_parent_persona_super_object_tree_access(testapp, db_session):
+    member, group, top_obj = _gen_owner(db_session)
+
+    # someone else
+    other = Login(provider="test", profile_id="other", persona=Profile())
+    db_session.add(other)
+    db_session.commit()
+    prior_id = top_obj.id
+
+    # we add 4 sub items
+    for i in range(4):
+        t = TestObject(owner=other.persona, public=True,
+                       belongs_to_id=prior_id)
+        db_session.add(t)
+        db_session.commit()
+        prior_id = t.id
+
+    # and another two private ones
+
+    t = TestObject(owner=other.persona, public=False,
+                   belongs_to_id=prior_id)
+    db_session.add(t)
+    db_session.commit()
+    prior_id = t.id
+
+    t = TestObject(owner=other.persona, public=False,
+                   belongs_to_id=prior_id)
+    db_session.add(t)
+    db_session.commit()
+    prior_id = t.id
+
+
+    # and another public but under private.
+    t = TestObject(owner=other.persona, public=True,
+                   belongs_to_id=prior_id)
+    db_session.add(t)
+    db_session.commit()
+
+
+
+
+    with testapp.test_request_context() as t:
+        t.user = member
+        # we should find five publicly accessiable objects
+        # and see none of the private from other person ones
+        assert Object.query.accessible.count() == 5

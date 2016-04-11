@@ -40,7 +40,8 @@ class AccessQuery(BaseQuery):
             ))).cte(name="accessible_items_graph", recursive=True)
         top_aliased = top_query.alias()
         two = slc.select().select_from(slc.join(
-            top_aliased, slc.c.belongs_to_id == top_aliased.c.id))
+            top_aliased, slc.c.belongs_to_id == top_aliased.c.id)
+            ).where(slc.c.public == True)
         return top_query.union(two)
 
     @property
