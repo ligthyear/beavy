@@ -107,15 +107,18 @@ def test_current_persona_id_string(testapp, db_session):
     with testapp.test_request_context(headers={"X-Act-As-Identity": "{}".format(group.id)}):
         member.current_persona == group
 
-def test_current_persona_name(testapp, db_session):
-    member, group = _gen_member(db_session)
-    with testapp.test_request_context(headers={"X-Act-As-Identity": group.name}):
-        member.current_persona == group
 
 def test_current_persona_name(testapp, db_session):
     member, group = _gen_member(db_session)
     with testapp.test_request_context(headers={"X-Act-As-Identity": group.name}):
         member.current_persona == group
+
+
+def test_current_persona_name(testapp, db_session):
+    member, group = _gen_member(db_session)
+    with testapp.test_request_context(headers={"X-Act-As-Identity": group.name}):
+        member.current_persona == group
+
 
 @pytest.mark.xfail(raises=BadRequest)
 def test_current_persona_fails(testapp, db_session):
