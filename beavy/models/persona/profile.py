@@ -1,6 +1,6 @@
 from flask.ext.security import UserMixin
-from .person import Person
 from beavy.app import db
+from .person import Person
 
 
 class Profile(Person, UserMixin):

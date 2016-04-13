@@ -192,9 +192,7 @@ def get_locale():
 
 
 #  ------ Database setup is done after here ----------
-from beavy.models.persona import Persona, Role       # noqa
-from beavy.models.profile import Profile             # noqa
-from beavy.models.organisation import Organisation   # noqa
+from beavy.models.persona import Persona, Role, Organisation, Profile      # noqa
 from beavy.models.login import Login                 # noqa
 
 

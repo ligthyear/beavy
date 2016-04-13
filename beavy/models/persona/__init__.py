@@ -89,3 +89,9 @@ class Persona(db.Model):
         top_aliased = top_query.alias()
         return top_query.union(Role.query.join(top_aliased,
                                Role.source_id == top_aliased.c.target_id))
+
+
+from .bot import Bot                    # noqa
+from .organisation import Organisation  # noqa
+from .person import Person              # noqa
+from .profile import Profile            # noqa

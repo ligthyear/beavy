@@ -2,8 +2,7 @@ from flask_babel import gettext as _
 from werkzeug.exceptions import BadRequest
 from sqlalchemy import orm, func, select, or_, text
 from ..app import db, app, request
-from .persona import Persona, Role
-from .profile import Profile
+from .persona import Persona, Role, Profile
 from kombu.utils import cached_property
 
 import logging

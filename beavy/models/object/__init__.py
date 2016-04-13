@@ -7,7 +7,7 @@ from beavy.common.access_query import AccessQuery
 from itertools import chain
 from flask import abort
 
-from .persona import Persona
+from ..persona import Persona
 from beavy.app import db
 from collections import defaultdict
 

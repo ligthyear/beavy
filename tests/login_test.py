@@ -1,7 +1,5 @@
 from beavy.app import app, db, current_user
-from beavy.models.persona import Persona, Role
-from beavy.models.profile import Profile
-from beavy.models.organisation import Organisation
+from beavy.models.persona import Persona, Role, Profile, Organisation 
 from werkzeug.exceptions import BadRequest
 from beavy.models.login import Login
 from flask.ext.security.utils import encrypt_password

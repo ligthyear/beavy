@@ -4,8 +4,8 @@ from beavy.common.access_query import AccessQuery
 from collections import defaultdict
 from beavy.app import db
 from enum import Enum, unique
-from .object import Object
-from .persona import Persona
+from ..object import Object
+from ..persona import Persona
 
 
 class Activity(db.Model):
