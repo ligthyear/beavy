@@ -1,6 +1,5 @@
 from sqlalchemy import func
 from beavy.app import db
-from sqlalchemy.sql import text, select
 
 
 class Role(db.Model):

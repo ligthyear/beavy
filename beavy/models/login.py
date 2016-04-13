@@ -1,7 +1,7 @@
 from flask_babel import gettext as _
 from werkzeug.exceptions import BadRequest
-from sqlalchemy import orm, func, select, or_
-from ..app import db, app
+from sqlalchemy import orm, func, select, or_, text
+from ..app import db, app, request
 from .persona import Persona, Role
 from .profile import Profile
 from kombu.utils import cached_property
@@ -159,25 +159,27 @@ class Login(db.Model):
 
     @cached_property
     def current_persona(self):
-        from beavy.app import request
 
         requested_identity = request.headers.get("X-Act-As-Identity", None)
         if not requested_identity:
-            return self.persona
+            persona = self.persona
+        else:
+            persona_query = Persona.query.filter(Persona.id.in_(
+                select([self.persona.persona_graph.c.target_id])))
 
-        persona_query = Persona.query.filter(Persona.id.in_(
-            select([self.persona.persona_graph.c.target_id])))
+            try:
+                persona = persona_query.filter(or_(
+                    Persona.id == int(requested_identity),
+                    Persona.name == requested_identity)).first()
+            except ValueError:
+                persona = persona_query.filter(
+                    Persona.name == requested_identity).first()
 
-        try:
-            persona = persona_query.filter(or_(
-                Persona.id == int(requested_identity),
-                Persona.name == requested_identity)).first()
-        except ValueError:
-            persona = persona_query.filter(
-                Persona.name == requested_identity).first()
+            # Should we check the role we are having somehow?
 
-        # Should we check the role we are having somehow?
+            if not persona:
+                raise BadRequest("You are asking to act as an entity you can't access.")
 
-        if not persona:
-            raise BadRequest("You are asking to act as an entity you can't access.")
+        db.session.execute(text('set session "beavy.current_persona_id" = :persona_id'), {"persona_id": persona.id})
+
         return persona

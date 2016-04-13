@@ -7,6 +7,8 @@ from beavy.models.login import Login
 
 import pytest
 
+CURRENT_PERSONA_QUERY = "SHOW beavy.current_persona_id"
+
 
 def _gen_member(db_session):
     group = Organisation(name="test_group")
@@ -100,30 +102,61 @@ def test_current_persona_id(testapp, db_session):
     member, group = _gen_member(db_session)
     with testapp.test_request_context():
         member.current_persona == member.persona
+        assert int(db_session.scalar(CURRENT_PERSONA_QUERY)) == member.persona.id
 
 
 def test_current_group_persona_id(testapp, db_session):
     member, group = _gen_member(db_session)
     with testapp.test_request_context(headers={"X-Act-As-Identity": group.id}):
         member.current_persona == group
+        assert int(db_session.scalar(CURRENT_PERSONA_QUERY)) == group.id
 
 
 def test_current_group_persona_id_string(testapp, db_session):
     member, group = _gen_member(db_session)
     with testapp.test_request_context(headers={"X-Act-As-Identity": "{}".format(group.id)}):
         member.current_persona == group
+        assert int(db_session.scalar(CURRENT_PERSONA_QUERY)) == group.id
 
 
 def test_current_group_persona_name(testapp, db_session):
     member, group = _gen_member(db_session)
     with testapp.test_request_context(headers={"X-Act-As-Identity": group.name}):
         member.current_persona == group
+        assert int(db_session.scalar(CURRENT_PERSONA_QUERY)) == group.id
+
+    with testapp.test_request_context():
+        member.current_persona == persona
+        assert int(db_session.scalar(CURRENT_PERSONA_QUERY)) == persona.id
+
+
+def test_session_persona_reset_between_connections(testapp, db_session):
+    """
+    This test ensure that the connection is cleaned up properly before
+    being reused and we aren't leaking the previously set current_persona_id
+    setting
+    """
+    # we have exactly one connection in our pool at any time!
+    assert db.engine.pool.size() == 1
+
+    member, group = _gen_member(db_session)
+    with testapp.test_request_context(headers={"X-Act-As-Identity": group.name}):
+        member.current_persona == group
+        assert int(db_session.scalar(CURRENT_PERSONA_QUERY)) == group.id
+
+    db_session.close() # close on the current session
+
+    # as we have only one connection in the pool, we receive the same
+    # connection and can make sure that is not having any persona set
+    other_session = db.create_scoped_session()
+    assert other_session.execute(CURRENT_PERSONA_QUERY).scalar() == ''
 
 
 def test_current_group_persona_name(testapp, db_session):
     member, group = _gen_member(db_session)
     with testapp.test_request_context(headers={"X-Act-As-Identity": group.name}):
         member.current_persona == group
+        assert int(db_session.scalar(CURRENT_PERSONA_QUERY)) == group.id
 
 
 @pytest.mark.xfail(raises=BadRequest)
@@ -145,3 +178,4 @@ def test_higher_persona_test_id(testapp, db_session):
     db_session.commit()
     with testapp.test_request_context(headers={"X-Act-As-Identity": holding.id}):
         member.current_persona == holding
+        assert int(db_session.scalar(CURRENT_PERSONA_QUERY)) == holding.id
