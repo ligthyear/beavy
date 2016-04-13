@@ -3,7 +3,6 @@ from sqlalchemy.orm import contains_eager, aliased
 from enum import Enum, unique
 from sqlalchemy import func
 from flask.ext.security import current_user
-from beavy.common.payload_property import PayloadProperty
 from beavy.common.access_query import AccessQuery
 from itertools import chain
 from flask import abort
@@ -40,6 +39,24 @@ class ObjectQuery(AccessQuery):
 
         return self.outerjoin(my_activities).options(contains_eager(
             Object.my_activities, alias=my_activities))
+
+
+class SharedWith(db.Model):
+    __table__ = db.Table('object_shared', db.metadata,
+                         db.Column('object_id',
+                                   db.Integer(),
+                                   db.ForeignKey("objects.id"),
+                                   nullable=False),
+                         db.Column('persona_id',
+                                   db.Integer(),
+                                   db.ForeignKey("persona.id"),
+                                   nullable=False),
+                         db.Column('level',
+                                   db.String(20),
+                                   nullable=False),
+                         db.PrimaryKeyConstraint('object_id', 'persona_id'),
+                         db.UniqueConstraint('object_id', 'persona_id')
+                         )
 
 
 class Object(db.Model):
@@ -79,6 +96,6 @@ class Object(db.Model):
 
     owner = db.relationship(Persona, foreign_keys=owner_id)
     belongs_to = db.relationship("Object", foreign_keys=belongs_to_id)
-
+    shared_with = db.relationship(SharedWith)
 
 Object.__access_filters = defaultdict(list)

@@ -21,22 +21,26 @@ class AccessQuery(BaseQuery):
             )
         ]
 
-
-        # top_query = Role.query.filter(Role.source_id == self.id
-        #                               ).cte(name="persona_graph",
-        #                                     recursive=True)
-        #
-        # top_aliased = top_query.alias()
-        # return top_query.union(Role.query.join(top_aliased,
-        #                        Role.source_id == top_aliased.c.target_id))
-
     def _items_subquery(self, persona):
         persona_graph = persona.persona_graph
         slc = self._primary_entity.selectable
 
+        tests = [
+            slc.c.owner_id == persona.id,
+            slc.c.owner_id.in_(select([persona_graph.c.target_id]))
+            ]
+
+        try:
+            swith = self._primary_entity.mapper.relationships["shared_with"].table
+        except KeyError:
+            pass
+        else:
+            tests.append(slc.c.id.in_(select([swith.c.object_id]
+                         ).where(or_(swith.c.persona_id == persona.id, swith.c.persona_id.in_(
+                                 select([persona_graph.c.target_id]))))))
+
         top_query = slc.select().where(or_(
-            text(self.PUBLIC_SQL), or_(
-                slc.c.owner_id == persona.id, slc.c.owner_id.in_(select([persona_graph.c.target_id]))
+            text(self.PUBLIC_SQL), or_(*tests
             ))).cte(name="accessible_items_graph", recursive=True)
         top_aliased = top_query.alias()
         two = slc.select().select_from(slc.join(

@@ -1,7 +1,7 @@
 from beavy.app import app, db
 from beavy.models.persona import Persona, Role
 from beavy.models.profile import Profile
-from beavy.models.object import Object
+from beavy.models.object import Object, SharedWith
 from beavy.models.organisation import Organisation
 from werkzeug.exceptions import BadRequest
 from beavy.models.login import Login
@@ -185,10 +185,60 @@ def test_parent_persona_super_object_tree_access(testapp, db_session):
     db_session.commit()
 
 
-
-
     with testapp.test_request_context() as t:
         t.user = member
         # we should find five publicly accessiable objects
         # and see none of the private from other person ones
         assert Object.query.accessible.count() == 5
+
+
+def test_parent_persona_super_object_tree_access_with_shared(testapp, db_session):
+    member, group, top_obj = _gen_owner(db_session)
+
+    # someone else
+    other = Login(provider="test", profile_id="other", persona=Profile())
+    db_session.add(other)
+    db_session.commit()
+    prior_id = top_obj.id
+
+    # we add 4 sub items
+    for i in range(4):
+        t = TestObject(owner=other.persona, public=True,
+                       belongs_to_id=prior_id)
+        db_session.add(t)
+        db_session.commit()
+        prior_id = t.id
+
+
+    # direct of a public one, but still private
+    t = TestObject(owner=other.persona, public=False,
+                   belongs_to_id=prior_id)
+    db_session.add(t)
+    db_session.commit()
+
+
+    # add another private but shared with us
+    t = TestObject(owner=other.persona, public=False,
+                   belongs_to_id=prior_id)
+    db_session.add(t)
+    db_session.commit()
+    db.session.add(SharedWith(object_id=t.id, persona_id=member.persona.id, level="view"))
+    prior_id = t.id
+
+    # public and direct of the shared one
+    t = TestObject(owner=other.persona, public=True,
+                   belongs_to_id=prior_id)
+    db_session.add(t)
+    db_session.commit()
+
+    # direct of the shared one, but still extra private
+    t = TestObject(owner=other.persona, public=False,
+                   belongs_to_id=prior_id)
+    db_session.add(t)
+    db_session.commit()
+
+    with testapp.test_request_context() as t:
+        t.user = member
+        # we should find five publicly accessiable objects
+        # and see none of the private from other person ones
+        assert Object.query.accessible.count() == 7
