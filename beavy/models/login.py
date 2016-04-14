@@ -3,6 +3,7 @@ from werkzeug.exceptions import BadRequest
 from sqlalchemy import orm, func, select, or_, text
 from ..app import db, app, request
 from .persona import Persona, Role, Profile
+from beavy.utils.db_helpers import set_db_persona
 from kombu.utils import cached_property
 
 import logging
@@ -179,6 +180,6 @@ class Login(db.Model):
             if not persona:
                 raise BadRequest("You are asking to act as an entity you can't access.")
 
-        db.session.execute(text('set session "beavy.current_persona_id" = :persona_id'), {"persona_id": persona.id})
+        set_db_persona(persona)
 
         return persona

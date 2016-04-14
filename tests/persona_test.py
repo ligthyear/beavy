@@ -157,11 +157,11 @@ def test_current_group_persona_name(testapp, db_session):
         assert int(db_session.scalar(CURRENT_PERSONA_QUERY)) == group.id
 
 
-@pytest.mark.xfail(raises=BadRequest)
 def test_current_group_persona_fails(testapp, db_session):
     member, group = _gen_member(db_session)
     with testapp.test_request_context(headers={"X-Act-As-Identity": 123}):
-        member.current_persona == False
+        with pytest.raises(BadRequest):
+            member.current_persona == False
 
 
 def test_higher_persona_test_id(testapp, db_session):

@@ -1,6 +1,7 @@
 from beavy.app import app, db
 from beavy.models.persona import Persona, Role, Profile, Organisation
 from beavy.models.object import Object, SharedWith
+from beavy.utils.db_helpers import set_db_persona
 from werkzeug.exceptions import BadRequest
 from beavy.models.login import Login
 
@@ -192,6 +193,7 @@ def test_parent_persona_super_object_tree_access(testapp, db_session):
 
 def test_parent_persona_super_object_tree_access_with_shared(testapp, db_session):
     member, group, top_obj = _gen_owner(db_session)
+    set_db_persona(member)
 
     # someone else
     other = Login(provider="test", profile_id="other", persona=Profile())
