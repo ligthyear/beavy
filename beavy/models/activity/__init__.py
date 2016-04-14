@@ -48,3 +48,6 @@ if not hasattr(Object, 'my_activities'):
     # and will be loaded only if an object-query with "with_my_activities"
     # is executed. Otherwise it will be an empty InstrumentedList
     Object.my_activities = db.relationship(Activity, lazy='noload')
+
+
+from .sharing import *      # noqa

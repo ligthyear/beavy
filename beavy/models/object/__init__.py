@@ -96,6 +96,17 @@ class Object(db.Model):
 
     owner = db.relationship(Persona, foreign_keys=owner_id)
     belongs_to = db.relationship("Object", foreign_keys=belongs_to_id)
-    shared_with = db.relationship(SharedWith)
+    shared_with = db.relationship(SharedWith, lazy='dynamic')
+
+    def share_with(self, persona, level="view"):
+        sWith = self.shared_with.filter_by(persona_id=persona.id).first()
+        if not sWith:
+            sWith = SharedWith(persona_id=persona.id)
+            self.shared_with.append(sWith)
+        sWith.level = level
+        return sWith
+
+    def unshare_with(self, persona):
+        self.shared_with.filter_by(persona_id=persona.id).delete()
 
 Object.__access_filters = defaultdict(list)
