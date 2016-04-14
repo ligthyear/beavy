@@ -1,3 +1,4 @@
+from sqlalchemy import MetaData
 import os
 import pytest
 import sys
@@ -18,6 +19,8 @@ if os.environ.get("WITH_SQL", False):
 
 os.environ["BEAVY_ENV"] = "TEST"
 from beavy.app import app, db
+from beavy.commands.database import migrate
+from flask.ext.migrate import upgrade as apply_migrations, downgrade
 
 def pytest_cmdline_preparse(args):
     # we only mess if nothing else is supplied
@@ -62,7 +65,7 @@ def testapp(request):
 @pytest.yield_fixture(scope="function")
 def db_session(testapp):
     with testapp.app_context():
-        db.create_all()
+        apply_migrations()
         connection = db.engine.connect()
         transaction = connection.begin()
         session = db.create_scoped_session()
@@ -71,4 +74,10 @@ def db_session(testapp):
         transaction.rollback()
         connection.close()
         session.remove()
+
         db.drop_all()
+        # Drop leftover tables (e.g. Alembic schema versions).
+        md = MetaData()
+        md.reflect(bind=db.engine)
+        for table in md.sorted_tables:
+            table.drop(db.engine)

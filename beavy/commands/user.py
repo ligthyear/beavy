@@ -2,8 +2,7 @@ from flask_script import Manager
 from flask.ext.security.utils import encrypt_password
 
 from beavy.models.login import Login
-from beavy.models.persona import Role
-from beavy.models.profile import Profile
+from beavy.models.persona import Role, Profile
 from beavy.app import app, db
 
 from datetime import datetime
