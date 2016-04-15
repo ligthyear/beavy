@@ -21,7 +21,7 @@ def update_object_likes_count(mapper, connection, target):
     # unfortunately, we can't do an aggregate in update directly...
     # TODO: it would be nice if we could _only_ update our items
     # instead of the entire payload
-    obj = target.object
+    obj = Object.query.get(target.object_id)
     obj.likes_count = Like.query.filter(
         Like.object_id == obj.id).count()
     obj.likes_updated = datetime.now().isoformat()

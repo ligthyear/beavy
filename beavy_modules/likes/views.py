@@ -12,14 +12,15 @@ from beavy.app import db
 
 
 def _load_likes(user):
-    return user_likes_paged.dump(as_page(Object.query   # noqa
-            .by_capability(Object.Capabilities.listed,
-                           Object.Capabilities.listed_for_activity)
+    paged = as_page(Object.query   # noqa
+            .accessible
+#            .by_capability(Object.Capabilities.listed,
+#                           Object.Capabilities.listed_for_activity)
             .with_my_activities()
             .join(Like, Like.object_id == Object.id)
             .filter(Like.subject_id == user.id)
-            .add_entity(Like)))
-
+            .add_entity(Like))
+    return user_likes_paged.dump(paged)
     # return user_likes_paged.dump(as_page(
     #     Like.query
     #         .filter(Like.subject_id == user.id)
@@ -66,7 +67,7 @@ def like_object(obj):
 @login_required
 @api_only
 def unlike_object(obj):
-    db.session.delete(Like.query.filter_by(subject_id=current_user.id,
-                                           object_id=obj.id))
+    Like.query.filter_by(subject_id=current_user.id,
+                         object_id=obj.id).delete()
     db.session.commit()
     return {"liked": False}
