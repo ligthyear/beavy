@@ -13,4 +13,4 @@ class PrivateMessage(Object):
     title = PayloadProperty('title')
 
 
-ModelConverter.__OBJECTS__['private_message'] = PrivateMessage
+ModelConverter.__OBJECTS__[PM_ID] = PrivateMessage

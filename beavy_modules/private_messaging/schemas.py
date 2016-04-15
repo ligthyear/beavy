@@ -13,7 +13,7 @@ class PrivateMessageSchema(Schema):
     type = fields.String(attribute="discriminator")
 
     class Meta:
-        type_ = 'private_message'  # Required
+        type_ = PM_ID  # Required
 
 
 pm = PrivateMessageSchema()
