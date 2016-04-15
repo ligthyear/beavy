@@ -27,7 +27,50 @@ def upgrade():
                     sa.PrimaryKeyConstraint('object_id', 'persona_id'),
                     sa.UniqueConstraint('object_id', 'persona_id')
                     )
+    op.execute(sa.text("""
+    CREATE OR REPLACE FUNCTION func_sharing_updated() RETURNS TRIGGER
+    AS $func_sharing_updated$
+        DECLARE
+        BEGIN
+            IF (TG_OP = 'DELETE') OR (TG_OP = 'UPDATE') THEN
+                -- insert unshared
+                INSERT INTO activities (
+                    subject_id,
+                    verb,
+                    object_id,
+                    whom_id)
+                VALUES (
+                    current_setting('beavy.current_persona_id')::integer,
+                    'unshared',
+                    OLD.object_id,
+                    OLD.persona_id
+                );
+            END IF;
+            IF (TG_OP = 'INSERT') OR (TG_OP = 'UPDATE') THEN
+                -- insert shared
+                INSERT INTO activities (
+                    subject_id,
+                    verb,
+                    object_id,
+                    whom_id)
+                VALUES (
+                    current_setting('beavy.current_persona_id')::integer,
+                    'shared',
+                    NEW.object_id,
+                    NEW.persona_id
+                );
+            END IF;
+            RETURN NULL;
+        END;
+    $func_sharing_updated$ LANGUAGE plpgsql;
+
+    CREATE TRIGGER trigger_sharing_updated AFTER INSERT OR UPDATE OR DELETE
+    ON object_shared
+    FOR EACH ROW EXECUTE PROCEDURE func_sharing_updated();
+"""))
 
 
 def downgrade():
+    op.execute("DROP TRIGGER trigger_sharing_updated;")
+    op.execute("DROP FUNCTION IF EXISTS func_sharing_updated;")
     op.drop_table('object_shared')
