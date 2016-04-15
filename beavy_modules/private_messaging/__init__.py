@@ -6,8 +6,8 @@ from .views import *   # noqa
 
 
 class PrivateMessageAdminView(AdminPolyModelView):
-    column_list = ['created_at', 'title', 'participants']
-    form_columns = ['created_at', 'title', 'participants']
+    column_list = ['created_at', 'title']
+    form_columns = ['created_at', 'title']
     form_extra_fields = {'title': StringField()}
 
 
