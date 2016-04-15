@@ -55,6 +55,7 @@ TEST: &test
   SECRET_KEY: "TEST_DONT_EVER_USE"
   RATELIMIT_ENABLED: False
   LOGIN_DISABLED: False
+  SERVER_NAME: "test.local"
 
 PRODUCTION: &production
   <<: *common
