@@ -24,7 +24,7 @@ def test_likes_simple(db_session):
     """
     obj = _create_obj(db_session)
 
-    assert not obj.likes_count
+    assert obj.likes_count == 0
     assert not obj.likes_updated
 
     db_session.add(Like(object=obj, subject=obj.owner))
