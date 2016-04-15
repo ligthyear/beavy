@@ -1,6 +1,7 @@
 
 from marshmallow_jsonapi.fields import Relationship
 from marshmallow_jsonapi.utils import get_value_or_raise
+from .morphing_schema import MorphingSchema
 
 
 class IncludingHyperlinkRelated(Relationship):
@@ -27,7 +28,10 @@ class IncludingHyperlinkRelated(Relationship):
         return included_data
 
     def _extract_attributes(self, value):
-        sub = self.nestedObj.dump(value).data
+        if isinstance(self.nestedObj, MorphingSchema):
+            sub = self.nestedObj.select_processor(value).dump(value).data
+        else:
+            sub = self.nestedObj.dump(value).data
         try:
             return sub["data"]["attributes"]
         except (KeyError, TypeError):
