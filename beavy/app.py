@@ -184,7 +184,7 @@ def inject_messages():
 def get_locale():
     locale = None
     if current_user is not None and current_user.is_authenticated:
-        locale = current_user.language_preference
+        locale = getattr(current_user, "language_preference", None)
     elif app.config.get("LANGUAGES") is not None:
         languages = app.config.get("LANGUAGES")
         locale = request.accept_languages.best_match(languages)
