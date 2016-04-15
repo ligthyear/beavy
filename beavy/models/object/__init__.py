@@ -31,7 +31,7 @@ class ObjectQuery(AccessQuery):
         if not current_user or not current_user.is_authenticated:
             return self
 
-        from .activity import Activity
+        from ..activity import Activity
 
         my_activities = aliased(Activity.query.filter(
             Activity.subject_id == current_user.id
