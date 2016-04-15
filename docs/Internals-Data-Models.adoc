@@ -1,7 +1,30 @@
 = Data Models
 
-The data model in beavy is a highly customisable and flexible one, not only in the techniques used (Signle-Table-Inheritance and Postgres' JSONB) but further more in the abstracted concepts behind that. This part of the documentation wants to introduce and explain the ideas and concepts behind the beavy implementation and hopefully make you understand why it is how it is.
+The data model in beavy is a highly customizable and flexible one, not only in the techniques used – SingleTableInheritance and Postgres' JSONB – but further more in the abstracted concepts behind that. This part of the documentation wants to introduce and explain the ideas and concepts behind the beavy implementation and hopefully make you understand why it is how it is.
 
-== JSONB
+== Postgresql
 
-== Single Table Inheritance
+A lot of the way that beavy structures data is only possible with the latest innovations and developments of Postgres (we require version 9.4+ to run). Specifically the new JSONB-Datatype is of importance to us, secondly we rely on indexes and triggers to help us out a lot and in general put all database logic that can happen in the database, right into the database.
+
+=== JSONB
+
+JSONB is a recently introduced data type native to Postgres. Although the names are similar it is not the same as MongoDB's JSON-Binary, but rather an advancement of the already existing JSON datatype inside Postgres: both are data types you can specify for your column and enforce you to store valid JSON-data there. However, unlike the old the new JSONB is "understood" by Postgres, that means you can query and index its internals. At the same time, the size of that field is not limited.
+
+Let me repeat that for clarity: Through JSONB *Postgresql allows you to store and _query_  arbitrary documents as a column in your database* – effectively merging relational database and document stores. Awesome, right?
+
+=== Trigger
+
+As said before, all actions that can happen in the database, we try to make happen there. It is more efficient, effective and robust than relying on python code to be run "after a model was saved". The way this is often managed is through database triggers, which react on related changes. For example when you add or change the who an object is shared with, a trigger will create the corresponding activities logging what just happened. Or a trigger might prevent you from deleting certain objects and flags them as deleted instead.
+
+We use triggers to enforce consistency on application, not only on relational level. Triggers might prevent you from doing things that would create logical inconsistencies in the system or wipe logging information.
+
+=== Session Settings
+
+In order to do this, triggers often rely on local _session settings_, like the "acting persona" (see personas to learn more about this) to log a share. Triggers find this context through the usage of `set session` variables that postgres allows us to define.
+
+
+= Single Table Inheritance
+
+Through leveraging JSONB we can have arbitrary data in a column of our database, though other columns have foreign-key or other constrains. This allows us to rethink how we model information in the database, similarly how you'd model it in a noSQL or DocumentStore: aside from the unique id, they have a `type`-field, which tells your app, how it should interpret and represent this data. The usual way to have this representation in classic ORMs is through what is called `SingleTableInheritance`: one table being represented by multiple ORM Objects depending on a specific field in the table itself.
+
+We use this feature a lot to model the object, activity and persona system – the key parts of the application. Rather than inventing a new table, with slightly different columns for everything – which becomes incredibly hard and complex to keep the relationships together – we try to model all cases using these basic tables and just a few more python/js models on top. Everything stems from just a few tables.

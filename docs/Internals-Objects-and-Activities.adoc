@@ -1,1 +1,96 @@
 = Objects and Activities
+
+As already discussed the database model of beavy is a little different than what you'd usually find. Through the usage of JSONB and the SingleTableInheritance-pattern we can model and build complex models in a document-style with strong constrains and foreign keys. This frees us from old constrains and bad patterns (like "ContentTypeTables") and enables a completely  new class of database models, a document store with relations.
+
+Yet, how does this actual work in practice. Let's take a look at the way beavy models _any_ object in its database and you can extend this easily without having to create new tables, thus leveraging all features the old table already provides.
+
+The base idea behind the way beavy models its social network is in the same way we think of the real world and model it in our speech: Actors, Verbs, Objects.
+Actors are its own chapter following this one – we call them "Personas" – but for what we investigate here, lets understand them as "someone that can do something".
+
+== Objects
+
+Basically anything that can be acted upon but doesn't act in itself is considered an `Object` in beavy`. Objects in beavy must by of a specific type (`Object` by itself is a meta class only), they are owned by someone (who created it) and they might belong to any other type of object. Further more we store, when it was created and whether that object is publicly accessible or only for the owner and whoever they shared it with. Using the JSONB field, we have one column which contains the actual document the implementing type stores its information in. The basic model kinda looks like this:
+
+[source,python]
+----
+class Object(Model):
+    id = Column(Integer,
+                primary_key=True)
+    discriminator = Column('type',
+                           String(100),
+                           nullable=False)
+    created_at = Column('created_at',
+                        DateTime(),
+                        nullable=False,
+                        server_default=func.now())
+    payload = Column('payload',
+                     JSONB, nullable=True)
+    owner_id = Column(Integer,
+                      ForeignKey(Persona.id),
+                      nullable=False)
+    belongs_to_id = Column(Integer,
+                           ForeignKey("objects.id"),
+                           nullable=True)
+
+    public = Column('public',
+                    Boolean,
+                    nullable=False,
+                    default=False)
+----
+
+Let's model a discussion hosting platform with this. Each thread on the platform is its own type of object `Thread` (with `type='thread'`), it can be created, viewed, shared – yet it doesn't act by itself. An object belongs to someone, the persona who uploaded it, which will be stored in the `owner_id`-field. The owner can choose to make that thread "private" by setting `public=false`. Depending on your implementation, the thread probably has a title, which will be stored inside the `payload` and the Thread-Object can make that accessible through the `PayloadProperty` easily.
+
+When someone creates a post now, that is its own type of `Post`-object (`type='post'``). A post object _must_ belong to another object, in this case a `Thread` object and again has an owner. Other than the thread object, the payload of a post contains no `title` but instead a `text`-field which stores the content of that post.
+
+Now let's structure our forum in categories. A category again is its own Object (`type='category'`), owned by whomever created it. A category can belong to another category, being a sub-category. And now Threads also have an anchor point: a category they belong to.
+
+We were able to model all of that with just one table. Any feature that is now provided for objects of that table (for example, commenting on arbitrary objects or "liking" of objects) is available to all those objects without any further work needing to be done. All that hierarchical structure, with strong constrains and custom payloads, all easily modeled through the abstraction of an `object`.
+
+
+== Activities
+
+Activities are another example of what appears to be complex models trimmed down to its core idea. Activities are log entries of actions which happened (to the knowledge of the system). Every activity must have an actor (or subject), the activity itself, optionally has an object and another persona involved in the activity. Our base activity looks like this:
+
+[source,python]
+----
+class Activity(Model):
+    id = Column(Integer,
+                primary_key=True)
+    subject_id = Column(Integer,
+                        ForeignKey(Persona.id),
+                        nullable=False)
+    discriminator = Column('verb',
+                           String(100),
+                           nullable=False)
+    created_at = Column('created_at',
+                        DateTime(),
+                        nullable=False,
+                        server_default=func.now())
+    object_id = Column(Integer,
+                       ForeignKey("objects.id"),
+                       nullable=True)
+    whom_id = Column(Integer,
+                     ForeignKey(Persona.id),
+                     nullable=True)
+    payload = Column('payload',
+                     JSONB,
+                     nullable=True)
+----
+
+Taking the example from before, we could log every time someone creates a thread, a post or category with a `Created`-Activity (`verb='created'`), linking to persona acting, when and the object in question. This might seem a little silly as that clearly was their "owner", but what if you had a `Edited`-Activity? You could easily log not only when an entry has been updated and by whom but even _what has changed_ using the `payload` property. And you only need to build it once and it can be applied to any object without messing any further.
+
+This allows us to easily model `liking` or `edits` or to log `who shared what with whom when` as the following chapter shows.
+
+
+== Sharing
+
+We only briefly mentioned that objects can be public or private. But beavy natively brings a slightly more sophisticated approach to this. For once `publicity` only applies from the root of the hierarchy, meaning that an object is only public if all objects in the `belongs_to`-tree above it are public, too. In the example above a thread that is marked as public but is in a category, which is `private`, will still only be accessible to whomever has access to that category. _Privacy trickles down_ and restricts all objects that belong to it.
+
+By default `public=false` means only the owner persona has access to it. However the owner can decide to share the object with other personas. As a matter of fact, every object can be shared with any number of personas, giving them various levels of access. Thus, you could create a private category in your forum and then share it with any number of personas. While threads in there are public by default, they would only be shared with whomever has access to that category. Or, one could even create a more private thread in there and share that only with a subset of personas – and even give them `edit` access, while they'd usually only be able to view items in that category.
+
+However, as access trickles down, you can't give someone access to an item inside a tree they otherwise don't have access to. You can only change the access level they are having on that objects or further tighten the circle of personas that can access it at all.
+
+Now, it is very good to know, who gave access to whom and when that happened. That's why beavy doesn't only allow you to created `SharedWith`-Objects (the relation that describes Object-Persona-Shares) but automatically keeps `Activity`-Logs when that happens. Specifically a database trigger creates a new `Shared` or `Unshared` activity every time that changes – with the persona sharing, the persona shared with and the object in question logged. This happens independently of any code execution in the database enforcing the application consistency mentioned in the previous chapter.
+
+
+By combining all types of objects as one on the database level and building the `belongs_to`-hierarchy as described above, this per-object-sharing architecture frees you from a lot of hassle of multi-table access control mechanics and complexity. It's all there, in three tables and a simple recursive query (that is done for you automatically most of the time) and a fourth that logs all that activity – independent of the object type in question.
