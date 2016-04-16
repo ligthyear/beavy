@@ -12,7 +12,6 @@ def pytest_cmdline_preparse(args):
         return args
 
     args.insert(0, "-vv")
-    args.append("tests")
 
     def add_path_with_coverage(x):
         args.append("--cov={}".format(x))
