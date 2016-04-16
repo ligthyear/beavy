@@ -1,7 +1,7 @@
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import contains_eager, aliased
+from sqlalchemy import func, text
 from enum import Enum, unique
-from sqlalchemy import func
 from flask.ext.security import current_user
 from beavy.common.access_query import AccessQuery
 from itertools import chain
@@ -14,16 +14,18 @@ from collections import defaultdict
 
 class ObjectQuery(AccessQuery):
 
-    def by_capability(self, aborting=True, abort_code=404, *caps):
-        caps = set(chain.from_iterable(map(lambda c:
-                                           getattr(Object.TypesForCapability,
-                                                   getattr(c, 'value', c), []),
-                                           caps)))
+    def by_capability(self, *caps, aborting=True, abort_code=404):
+
+        caps = set(chain.from_iterable(
+            map(lambda c: getattr(Object.TypesForCapability,
+                getattr(c, 'value', c), []),
+                caps)))
+
         if not caps:
             # No types found, break right here.
             if aborting:
                 raise abort(abort_code)
-            return self.filter("1=0")
+            return self.filter(text("False"))
 
         return self.filter(Object.discriminator.in_(caps))
 

@@ -52,7 +52,7 @@ def generate_capability_maps(obj):
                 cap = getattr(cap, "value", cap)
                 capabilities_map.setdefault(cap, []).append(typ)
 
-    caps = namedtuple('Cababilities', capabilities_map.keys())
+    caps = namedtuple('Capabilities', capabilities_map.keys())
     obj.TypesForCapability = caps(**capabilities_map)
 
 
