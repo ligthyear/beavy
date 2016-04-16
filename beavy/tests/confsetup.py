@@ -34,6 +34,25 @@ def pytest_runtest_call(item):
         item.funcargs.get('db_session').flush()
 
 
+@pytest.yield_fixture(scope='function')
+def authed_client(testapp, db_session):
+    from beavy.models.login import Login
+    from beavy.models.persona import Person
+
+    login = Login(persona=Person(), provider="test", profile_id="test")
+    db_session.add(login)
+    db_session.commit()
+
+    with testapp.test_client() as c:
+        with c.session_transaction() as sess:
+            sess['user_id'] = login.id
+            sess['_fresh'] = True
+
+        c.login = login
+        yield c
+
+
+
 @pytest.yield_fixture(scope='session')
 def testapp(request):
     """Session-wide test `Flask` application."""

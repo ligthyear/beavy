@@ -4,13 +4,9 @@ from beavy.models.object import Object, SharedWith
 from beavy.utils.db_helpers import set_db_persona
 from werkzeug.exceptions import BadRequest
 from beavy.models.login import Login
+from beavy.tests.helpers import TestObject
 
 import pytest
-
-class TestObject(Object):
-    __mapper_args__ = {
-        'polymorphic_identity': "test"
-    }
 
 
 def _gen_owner(db_session):

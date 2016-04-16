@@ -5,20 +5,15 @@ from beavy.models.activity import Shared, Unshared
 from werkzeug.exceptions import BadRequest
 from beavy.models.login import Login
 from beavy.utils.db_helpers import set_db_persona
+from beavy.tests.helpers import TestObject
 
 from sqlalchemy.exc import ProgrammingError as SQLProgrammingError
 
 import pytest
 
 
-class TestObject(Object):
-    __mapper_args__ = {
-        'polymorphic_identity': "test"
-    }
-
-
 def _gen_people(db_session):
-    login = Login(provider="test", profile_id="me", persona=Profile())
+    login = Login(provider="test", profile_id="other", persona=Profile())
     other = Login(provider="test", profile_id="other", persona=Profile() )
     obj = TestObject(owner=login.persona)
     db_session.add(login)
@@ -28,18 +23,8 @@ def _gen_people(db_session):
     return (login, other, obj)
 
 
-@pytest.yield_fixture(scope='function')
-def logged_in_session(testapp, db_session):
+def test_simple_sharing(testapp, db_session):
     login, other, obj = _gen_people(db_session)
-    with testapp.test_client() as c:
-        with c.session_transaction() as sess:
-            sess['user_id'] = login.id
-            sess['_fresh'] = True
-        yield (c, login, other, obj)
-
-
-def test_simple_sharing(testapp, logged_in_session, db_session):
-    client, login, other, obj = logged_in_session
 
 
     with testapp.test_request_context() as t:
@@ -102,8 +87,9 @@ def test_simple_sharing(testapp, logged_in_session, db_session):
         assert Unshared.query.count() == 1
 
 
-def test_sharing_without_db_persona_fails_on_db(testapp, logged_in_session, db_session):
-    client, login, other, obj = logged_in_session
+def test_sharing_without_db_persona_fails_on_db(testapp, db_session):
+    login, other, obj = _gen_people(db_session)
+
 
     with testapp.test_request_context() as t:
         t.user = login
