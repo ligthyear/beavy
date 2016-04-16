@@ -1,6 +1,7 @@
-import json
-
 from beavy.models.object import Object
+
+import json
+import pytest
 
 class TestObject(Object):
     __mapper_args__ = {
@@ -17,6 +18,6 @@ def api_call(client, url, expected_code=200, method="get", **kwargs):
     resp = getattr(client, method)(url, **kwargs)
 
     if expected_code:
-        assert resp.status_code == expected_code, "Wrong Status Code"
+        assert resp.status_code == expected_code, "Wrong Status Code. Got {} expected {}".format(resp.status_code, expected_code)
 
     return json.loads(resp.get_data(as_text=True))

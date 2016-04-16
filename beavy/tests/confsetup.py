@@ -34,6 +34,25 @@ def pytest_runtest_call(item):
         item.funcargs.get('db_session').flush()
 
 
+
+@pytest.fixture(scope='module')
+def ListedTestObject():
+    from beavy.models.object import Object
+    from beavy.setup import generate_capability_maps
+
+    class testobj(Object):
+        __mapper_args__ = {
+            'polymorphic_identity': "__helpers__test_listable"
+        }
+        CAPABILITIES = (Object.Capabilities.listed,
+                        Object.Capabilities.listed_for_activity )
+
+
+    generate_capability_maps(Object)
+
+    return testobj
+
+
 @pytest.yield_fixture(scope='function')
 def authed_client(testapp, db_session):
     from beavy.models.login import Login
