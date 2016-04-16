@@ -61,6 +61,20 @@ class SharedWith(db.Model):
                          )
 
 
+class Reference(db.Model):
+    __table__ = db.Table('object_refs', db.metadata,
+                         db.Column('object_id',
+                                   db.Integer(),
+                                   db.ForeignKey("objects.id"),
+                                   nullable=False),
+                         db.Column('reference_id',
+                                   db.Integer(),
+                                   db.ForeignKey("object.id"),
+                                   nullable=False),
+                         db.PrimaryKeyConstraint('object_id', 'reference_id')
+                         )
+
+
 class Object(db.Model):
     """
     This is the primary base class for all kind of objects
@@ -99,6 +113,7 @@ class Object(db.Model):
     owner = db.relationship(Persona, foreign_keys=owner_id)
     belongs_to = db.relationship("Object", foreign_keys=belongs_to_id)
     shared_with = db.relationship(SharedWith, lazy='dynamic')
+    references = db.relationship(Reference, lazy='dynamic')
 
     def can_access(self, persona):
         return Object.query.accessibility_query(
