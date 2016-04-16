@@ -1,5 +1,6 @@
 from .object import Object
-from sqlalchemy.orm import validates
+from urllib.parse import urlparse
+from sqlalchemy import event
 
 
 class External(Object):
@@ -10,10 +11,12 @@ class External(Object):
         'polymorphic_identity': "external"
     }
 
-    @validates('payload')
-    def ensure_link(self, key, value):
-        """
-        Make sure we are having a link in the payload
-        """
-        assert value["link"]
-        return value
+
+def ensure_link(mapper, connection, target):
+    try:
+        urlparse(target.payload['link'])
+    except (KeyError, TypeError, AttributeError):
+        raise ValueError("Payload.link isn't a proper URL")
+
+event.listen(External, 'before_insert', ensure_link)
+event.listen(External, 'before_update', ensure_link)

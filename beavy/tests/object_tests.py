@@ -1,4 +1,4 @@
-from beavy.models.object import Object
+from beavy.models.object import Object, External
 from beavy.models.persona import Person
 from .helpers import TestObject
 from werkzeug.exceptions import NotFound, InternalServerError
@@ -23,6 +23,22 @@ def test_faulty_capabilities_access(testapp, ListedTestObject, db_session):
 
     assert Object.query.by_capability(NonExistingCaps.is_not_there,
         aborting=False).count() == 0
+
+
+def test_external_object_no_link_fails(db_session):
+    with pytest.raises(ValueError):
+        # having no link set should error:
+        obj = External(owner=Person())
+        db_session.add(obj)
+        db_session.commit()
+
+
+def test_external_object_improper_link_fails(db_session):
+    with pytest.raises(ValueError):
+        # having no link set should error:
+        obj = External(owner=Person(), payload={'link': 112345})
+        db_session.add(obj)
+        db_session.commit()
 
 
 def test_capabilities_access(testapp, ListedTestObject, db_session):
