@@ -14,19 +14,13 @@ from beavy.app import db
 def _load_likes(user):
     paged = as_page(Object.query   # noqa
             .accessible
-#            .by_capability(Object.Capabilities.listed,
-#                           Object.Capabilities.listed_for_activity)
+            .by_capability(Object.Capabilities.listed,
+                           Object.Capabilities.listed_for_activity)
             .with_my_activities()
             .join(Like, Like.object_id == Object.id)
             .filter(Like.subject_id == user.id)
             .add_entity(Like))
     return user_likes_paged.dump(paged)
-    # return user_likes_paged.dump(as_page(
-    #     Like.query
-    #         .filter(Like.subject_id == user.id)
-    #         .filter_visible(Like.object_id, Object.id)
-    #         .join(Like.object),
-    #     error_out=False))
 
 
 @users_bp.route("/<user:user>/likes/")
