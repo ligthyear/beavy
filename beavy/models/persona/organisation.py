@@ -1,4 +1,4 @@
-from ..persona import Persona
+from .persona import Persona
 
 
 class Organisation(Persona):

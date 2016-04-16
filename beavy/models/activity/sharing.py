@@ -1,4 +1,4 @@
-from ..activity import Activity
+from .activity import Activity
 
 
 class Shared(Activity):
