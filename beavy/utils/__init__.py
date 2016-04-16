@@ -2,6 +2,7 @@ from werkzeug.wrappers import Response as ResponseBase
 from flask import request, render_template, make_response, json, abort
 from logging import getLogger
 from marshmallow import MarshalResult
+from werkzeug.exceptions import HTTPException
 
 from functools import wraps
 
@@ -39,6 +40,31 @@ def load_modules_and_app(app):
         app_subm.init_app(app)
 
 
+def _reformat_exception(exc):
+    return ({"error": exc.name,
+             "code": exc.code,
+             "message": exc.description,
+             "messageHTML": exc.get_body()
+             },
+            exc.code,
+            exc.get_headers())
+
+
+def can_access_models(fn):
+    from beavy.app import db                     # noqa
+    from flask.ext.security import current_user  # noqa
+
+    @wraps(fn)
+    def wrapped(*args, **kwargs):
+        current_persona = current_user.current_persona if current_user.is_authenticated else None
+        for m in kwargs.values():
+            if isinstance(m, db.Model) and hasattr(m, "can_access"):
+                if not m.can_access(current_persona):
+                    raise abort(403)
+        return fn(*args, **kwargs)
+    return wrapped
+
+
 def api_only(fn):
     @wraps(fn)
     def wrapped(*args, **kwargs):
@@ -47,7 +73,10 @@ def api_only(fn):
         if not (accepted & API_MIMETYPES) and not explicit:
             return abort(415, "Unsupported Media Type")
 
-        resp = fn(*args, **kwargs)
+        try:
+            resp = fn(*args, **kwargs)
+        except HTTPException as exc:
+            resp = _reformat_exception(exc)
         if not isinstance(resp, ResponseBase):
             data, code, headers = unpack(resp)
             # we've found one, return json
@@ -58,7 +87,7 @@ def api_only(fn):
                                  code)
 
             if headers:
-                resp.headers.update(headers)
+                resp.headers.extend(headers)
             resp.headers["Content-Type"] = 'application/json'
         return resp
     return wrapped
@@ -93,7 +122,7 @@ def fallbackRender(template, key=None):
                 ct = "text/html"
 
             if headers:
-                resp.headers.update(headers)
+                resp.headers.extend(headers)
             resp.headers["Content-Type"] = ct
             return resp
 

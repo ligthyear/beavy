@@ -1,4 +1,6 @@
-from beavy.utils import fallbackRender, as_page, get_or_create, api_only
+from beavy.utils import (fallbackRender, as_page,
+                         get_or_create, api_only,
+                         can_access_models)
 from flask.ext.security import login_required, current_user
 from beavy.blueprints import (users as users_bp,
                               obj as objects_bp,
@@ -7,7 +9,6 @@ from beavy.blueprints import (users as users_bp,
 from beavy.models.object import Object
 from .models import Like
 from .schemas import user_likes_paged
-
 from beavy.app import db
 
 
@@ -39,6 +40,7 @@ def account_likes():
 @objects_bp.route("/<model:obj>/has_liked", methods=["GET"])
 @login_required
 @api_only
+@can_access_models
 def liked_object(obj):
     return {"liked": Like.query
                          .filter(Like.subject_id == current_user.id)
@@ -48,6 +50,7 @@ def liked_object(obj):
 @objects_bp.route("/<model:obj>/like", methods=["POST"])
 @login_required
 @api_only
+@can_access_models
 def like_object(obj):
     like, created = get_or_create(db.session, Like,
                                   subject_id=current_user.id,
@@ -60,6 +63,7 @@ def like_object(obj):
 @objects_bp.route("/<model:obj>/unlike", methods=["POST"])
 @login_required
 @api_only
+@can_access_models
 def unlike_object(obj):
     Like.query.filter_by(subject_id=current_user.id,
                          object_id=obj.id).delete()

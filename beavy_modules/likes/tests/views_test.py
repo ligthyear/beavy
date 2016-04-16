@@ -81,17 +81,17 @@ def test_unaccessible(authed_client, db_session):
     # nothing yet:
     assert api_call(c, url_for('account.account_likes'))['data'] == []
 
-    # comes back with a 404
-    api_call(c, url_for('object.liked_object', obj=obj.id, ),
-             expected_code=404)
+    # comes back with a 403
+    api_call(c, url_for('object.liked_object', obj=obj.id),
+             expected_code=403)
 
-    # comes back with a 404
+    # comes back with a 403
     api_call(c, url_for('object.like_object', obj=obj.id),
-            method="post", expected_code=404)
+            method="post", expected_code=403)
 
     # and nothing changed
     assert len(api_call(c, url_for('account.account_likes'))['data']) == 0
 
     # alright. unlike doesn't work either
     assert api_call(c, url_for('object.unlike_object', obj=obj.id),
-            method="post", expected_code=404)
+            method="post", expected_code=403)

@@ -50,10 +50,13 @@ class AccessQuery(BaseQuery):
 
     @property
     def accessible(self):
-        if not has_request_context() or not current_user.is_authenticated:
+        return self.accessibility_query(current_user.current_persona if current_user.is_authenticated else None)
+
+    def accessibility_query(self, persona):
+        if not has_request_context() or not persona:
             return self.filter(text(self.PUBLIC_SQL))
 
-        return self.filter(self._primary_entity.selectable.c.id.in_(select([self._items_subquery(current_user.current_persona).c.id])))
+        return self.filter(self._primary_entity.selectable.c.id.in_(select([self._items_subquery(persona).c.id])))
 
     def filter_visible(self, attr, remoteAttr):
         filters = self._gen_filters(remoteAttr.class_, 'view')

@@ -100,6 +100,10 @@ class Object(db.Model):
     belongs_to = db.relationship("Object", foreign_keys=belongs_to_id)
     shared_with = db.relationship(SharedWith, lazy='dynamic')
 
+    def can_access(self, persona):
+        return Object.query.accessibility_query(
+            persona).filter(Object.id == self.id).first()
+
     def share_with(self, persona, level="view"):
         sWith = self.shared_with.filter_by(persona_id=persona.id).first()
         if not sWith:
